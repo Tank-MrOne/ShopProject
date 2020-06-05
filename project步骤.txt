@@ -1,0 +1,188 @@
+【shop项目操作步骤】 
+1、使用脚手架搭建好基础项目结构
+	npm i -g @vue/cli	安装脚手架（已安装忽略）
+
+2、创建vue项目
+	vue create 项目名称	（默认和自定义随意，这里选择默认）
+
+3、安装router
+	npm i vue-router --save	 (注意是在项目目录下安装)
+
+4、安装完测试能否正常运行
+	npm run serve		(能正常打开提供的网址即可)
+
+5、测试打包能否正常（静态资源服务包）
+	npm run build		(能正常出现dist文件夹即可)
+	
+	如果需要测试静态资源服务包需要安装静态服务
+	npm i -g serve		全局安装静态服务
+	serve dist -p 8888	设置静态服务端口
+
+6、在项目的src目录下创建以下文件
+	App.vue			（在App.vue中编写好模版）
+	pages或者views文件夹	
+	store文件夹		（vuex）
+	router文件夹		（路由）
+	api文件夹		（发ajax请求）
+
+7、找到main.js，在里面部署好代码
+	import Vue from 'vue'
+	import App from './App.vue'
+
+	new Vue({
+  		el:"#app",
+  		render: h => h(App),
+	})
+
+8、配置eslint
+	1、局部设置：注释配置
+		比如：/* eslint-disable no-unused-vars */
+
+	2、全局设置：单个规则设置
+		找到package.json文件，找到rules属性,设置规则
+		比如：
+		"rules":{
+			"no-unused-vars" : "off"
+		}
+
+	3、全局设置：所有规则设置【选择这个方式】
+		在项目根目录下创建vue.config.js,编写代码
+		module.exports = {
+			lintOnSave : false  		// 全部关闭（二选一）
+			lintOnSave : 'warning'		//提示错误，但不影响项目运行（二选一）
+		}
+
+9、git管理
+	1）首先最好删除脚手架创建的.git文件
+	2) 使用命令git初始化 
+	 	git init 			(创建本地仓库)
+		git add -A			(提交到暂存区)
+		git commit -m "初始化"	 	(提交到提交区)
+	3）到github官网创建一个自己的远程仓库
+	4）git remote add origin 远程仓库地址	(连接远程仓库)
+	5）git push -u origin master		(推送到远程仓库)
+		如果想要记住远程密码输入 	git config --global credential.helper store
+		编写代码推送到远程仓库	 	git push origin master 		（将本地的master分支推送到远程）
+		将远程的代码更新到本地		git pull origin master		（将远程的master分支推送到本地）
+	6) 创建开发分支
+		git checkout -b dev		创建一个dev分支并且换到该分支
+		如果想拉取远程的分支到本地	git checkout -b dev origin/dev
+	7）推送到远程
+		git push
+
+10、搭建router模块
+	1）在pages或views文件夹下创建以下文件夹
+		Home  Search  Login  Register
+	2) 在这些文件夹下都创建一个index.vue文件，并编写好模版
+		<template>
+    			<div>Home</div>
+		</template>
+
+		<script>
+
+
+			export default {
+    				name:"Home"
+			}
+		</script>
+
+		<style lang="less" scoped>
+
+		</style>
+	3）在router文件夹下再创建一个routes.js文件，示例模版如下
+		import Home from '../pages/Home'
+		import Search from '../pages/Search'
+		
+		export default[
+		    {
+		        path:'/',
+		        component:Home 
+		    },
+		    {
+		        path:'/search',
+		        component:Search
+		    }
+		]
+	4）注册路由,在router文件夹下创建index.js文件，编写好以下模版
+		import Vue from "vue"
+		import VueRouter from "vue-router"
+		import routes from './routes'
+
+		Vue.use(VueRouter)
+
+		export default new VueRouter({
+		    routes
+		})
+	5) 找到main.js,导入router路由器
+		import router from './router'
+	6) 找到App.vue文件，在template中引人路由，通过<router-view></router-view>标签
+	7）在compontents文件夹下创建Header和Footer文件夹，并在这些文件夹下创建index.vue文件
+	8）在App.vue中引人Header和Footer，并注册
+	9）找到router文件夹，在index.js文件中将路由模式改成history模式	
+		mode:'history'	
+
+11、 渲染头部和底部样式
+	1）找到头部和底部的静态代码，
+		将header静态代码拷贝到components文件夹下的Header组件中
+		将footer静态代码拷贝到components文件夹下的Footer组件中
+		将css中对应的less代码拷贝到对应的组件中
+		在public文件夹下创建一个css文件夹，把reset.css文件拷贝进去
+		将图片文件放到组件下的创建一个images文件夹中
+	2）需要安装less包
+		npm i -D less less-loader
+	3）头部中的logo跳转
+		将logo的图片标签用<router-link to="/"></router-link>包围
+	4) 注册和登入的a标签也换成<router-link></router-link>
+	5）登入和注册界面不显示Header和Footer组件
+		找到routes.js文件，在注册和登入路由下添加一个属性
+		meta:{
+	            isHide:true
+	        }
+		在App.vue组建中找到Header和Footer组件，用v-if来判断是否显示
+
+12、在Header中设置搜索框为编程式跳转
+	1）给search标签添加一个点击事件
+	2）然后添加一个函数，进行编程式跳转
+		methods:{
+		        search(){
+		            this.$router.push('./search')
+		        }
+		}
+	【编程式跳转传参方式】
+		1、直接拼串带参数
+		methods:{
+		        search(){
+			    let {value} = this
+		            this.$router.push('./search'+value+'?valueq=【test-query】')
+		        }
+		}
+		2、对象语法带参数
+		methods:{
+		        search(){
+ 		           let {value} = this
+		           this.$router.push({
+		                name:'search',
+		                params:{value:value},
+		                query:{valueq:"【test-query】"}
+		            })
+		        }
+		}
+	3) 接收参数需要在router文件夹下的routes.js文件，找到对应的路由规则，
+		如果接收的是params参数，则在path路径后面加一个 :参数名
+			{
+			        path:'/search/:value',
+			        component:Search
+			 }
+		如果发送数据采用的是对象传参，则一定要加一个name属性
+			{
+			        path:'/search/:value',
+			        component:Search，
+				name:'search'
+			 }
+	4) 为了测试搜索的功能，可以在search路由中引入参数，并显示到页面上
+			<template>
+			    <div>
+			        接收的params参数是:{{$route.params.value}}
+			        接收的query参数是:{{$route.query.valueq}}
+			    </div>
+			</template>
