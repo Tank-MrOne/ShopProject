@@ -229,6 +229,136 @@
 	
 	  在Search组件中必须通过props接收上面的props对象参数
 
+13、Home组件及组件进行拆分
+	1）找到Home路由，将静态页面的Home内容全部粘贴到路由中
+	2）创建各个组件，名字随意，导入对应的css和图片文件
+	3）为了渲染效果好，建议注释掉轮播图的其他图片，只留一张
+
+14、进行ajax与后台进行交互
+	1) 下载依赖 npm i -S axios nprogress
+
+	2）在api文件夹下创建一个ajax.js文件
+
+	3）配置通用的基础的路径和超时时间
+		//导入axios
+		import axios from "axios"
+
+		//创建axios新实例，修改两个属性 ，baseURL 是修改请求的路径以/api开头，timeout设置超时时间15秒
+		const instance = axios.create({
+		    baseURL : '/api',
+		    timeout : 15000
+		})
+
+	4）显示请求进度条
+		//导入进度条组件
+		import NProgress from 'nprogress'
+
+		//注册请求拦截器
+		axios.interceptors.request.use(config => {
+		    【NProgress.start()】
+		    return config
+		})
+
+		//注册响应拦截器
+		axios.interceptors.response.use(
+		    response =>{
+		        【NProgress.done()】
+		    },
+		    error =>{
+		        【NProgress.done()】
+		    }
+		)
 
 
+	5）处理成功返回data
+		//导入进度条组件
+		import NProgress from 'nprogress'
+		//注册请求拦截器
+		axios.interceptors.request.use(config => {
+		    NProgress.start()
+		    return config
+		})
+
+		//注册响应拦截器
+		axios.interceptors.response.use(
+		    response =>{
+		        NProgress.done()
+		       【return response.data】 
+		    },
+		    error =>{
+		        NProgress.done()
+		    }
+		)
+
+	6）处理失败
+		//导入进度条组件
+		import NProgress from 'nprogress'
+		//注册请求拦截器
+		axios.interceptors.request.use(config => {
+		    NProgress.start()
+		    return config
+		})
+
+		//注册响应拦截器
+		axios.interceptors.response.use(
+		    response =>{
+		        NProgress.done()
+		        return response.data
+		    },
+		    error =>{
+		        NProgress.done()
+
+		        // 1、抛出异常
+		        // 【throw error】
+
+		        // 2、返回错误的promise
+		        【return  Promise.reject(error)】
+		    }
+		)
+
+	7）在api文件夹下创建一个index.js文件，为了包含所有的api
+		首先导入自定义的axios
+		import ajax from './ajax'
+
+		可以在这个index.js中设置多个api请求，比如登入api请求
+		export function reqLogin(mobile,password){
+		    return ajax({
+		        url:'/user/passport/login',
+		        method:'POST',
+		        data:{
+		            mobile,password
+		        }
+		    })
+		}
+
+	8）获取首页三级分类，示例采用箭头函数写法
+		export const reqCategorys = () => ajax('/product/getBaseCategoryList')
+
+	9）这里因为涉及到请求的向远程服务器发送，本地服务器无法处理，所以，我们需要在vue.config.js文件中添加一个跨域配置
+		devServer:{
+		        proxy:{
+ 		           '/api':{
+  		              target:"http://182.92.128.115",
+ 		               changeOrigin:true,
+ 		           }
+		        }
+		}
+
+		除了这种方式，还可以直接在ajax.js文件中直接修改baseURL地址为远程地址 - baseURL : 'http://182.92.128.115/api',【不推荐】
+
+
+	10）为了测试以上的操作，可以在App.vue文件中导入这个api，通过monted()来调用api接口
+		首先导入 import {reqCategorys} from './api'   获取首页三级分类的api
+	
+		然后直接调用这个api接口
+		async mounted(){
+		    await reqCategorys()
+  		}
+
+	
+
+15、导航栏动态数据，设置后天接口
+
+16、使用vuex管理组件数据
+	
 
