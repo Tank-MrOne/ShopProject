@@ -8,13 +8,13 @@ const instance = axios.create({
 })
 
 //注册请求拦截器
-axios.interceptors.request.use(config => {
+instance.interceptors.request.use(config => {
     NProgress.start()
     return config
 })
 
 //注册响应拦截器
-axios.interceptors.response.use(
+instance.interceptors.response.use(
     response =>{
         NProgress.done()
         return response.data

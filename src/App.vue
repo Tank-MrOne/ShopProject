@@ -10,13 +10,13 @@
 
 import Header from './components/Header'
 import Footer from './components/Footer'
-import {reqCategorys} from './api'
+// import {reqCategoryList} from './api'
 
 export default {
   name:'App',
-  async mounted(){
-    await reqCategorys()
-  },
+  // async mounted(){
+  //   await reqCategoryList()
+  // },
   components:{
     Footer,Header
   }

@@ -254,13 +254,13 @@
 		import NProgress from 'nprogress'
 
 		//注册请求拦截器
-		axios.interceptors.request.use(config => {
+		instance.interceptors.request.use(config => {
 		    【NProgress.start()】
 		    return config
 		})
 
 		//注册响应拦截器
-		axios.interceptors.response.use(
+		instance.interceptors.response.use(
 		    response =>{
 		        【NProgress.done()】
 		    },
@@ -274,13 +274,13 @@
 		//导入进度条组件
 		import NProgress from 'nprogress'
 		//注册请求拦截器
-		axios.interceptors.request.use(config => {
+		instance.interceptors.request.use(config => {
 		    NProgress.start()
 		    return config
 		})
 
 		//注册响应拦截器
-		axios.interceptors.response.use(
+		instance.interceptors.response.use(
 		    response =>{
 		        NProgress.done()
 		       【return response.data】 
@@ -294,13 +294,13 @@
 		//导入进度条组件
 		import NProgress from 'nprogress'
 		//注册请求拦截器
-		axios.interceptors.request.use(config => {
+		instance.interceptors.request.use(config => {
 		    NProgress.start()
 		    return config
 		})
 
 		//注册响应拦截器
-		axios.interceptors.response.use(
+		instance.interceptors.response.use(
 		    response =>{
 		        NProgress.done()
 		        return response.data
@@ -357,8 +357,26 @@
 
 	
 
-15、导航栏动态数据，设置后天接口
 
-16、使用vuex管理组件数据
+15、使用vuex管理组件数据
+	1） 下载依赖 npm i -S vuex
+
+	2） 在src目录下的store文件夹下创建index.js文件
+		这个文件需要导入vue 和 vuex ,通过use（vuex）来使用vuex，并暴露出去
+		export default new Vuex.store({
+		    state,
+		    mutations,
+		    actions,
+    		    getters,
+		    modules:{
+			
+		    }
+		})
+
+	3） 分别管理数据，在store目录下创建modules文件夹，在modules文件夹下创建单独的数据管理文件比如专门管理home组件数据的，home.js 
+		
 	
+
+
+16、导航栏动态数据，设置后天接口
 

@@ -11,4 +11,4 @@ export function reqLogin(mobile,password){
     })
 }
 
-export const reqCategorys = () => ajax('/product/getBaseCategoryList')
+export const reqCategoryList = () => ajax('/product/getBaseCategoryList')
