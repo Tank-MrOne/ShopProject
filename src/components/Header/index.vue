@@ -56,12 +56,30 @@ export default {
         
         search(){
             let {value} = this
+
+            let location = {
+                name : 'search'
+            }
+
+            // 1、字符串拼接
             // this.$router.push('./search/'+value)
-            this.$router.push({
-                name:'search',
-                params:{value:value},
-                query:{valueq:"【test-query】"}
-            })
+
+            // 2、对象传参
+            // this.$router.push({
+            //     name:'search',
+            //     params:{value:value},
+            //     query:{valueq:"【test-query】"}
+            // })
+
+            // 3、判断数据是否为空
+            if(value){
+                location.params = {value:value}
+                location.query = {valueq:"【test-query】"}
+            }
+            this.$router.push(location)
+
+            // 4、解决重复提交相同代码出错
+            // this.$router.push(location)
         }
     }
 }

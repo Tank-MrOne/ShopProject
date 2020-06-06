@@ -186,3 +186,49 @@
 			        接收的query参数是:{{$route.query.valueq}}
 			    </div>
 			</template>
+	5) 为了防止提交空字符串导致路径显示不正常，首先找到对应路由，在path路径后加一个？
+		然后在Header组件中找到点击提交函数，在里面通过判断来发送对应的对象
+		methods:{      
+		        search(){
+		            let {value} = this
+		            let location = {
+		                name : 'search'
+		            } 
+		            if(value){
+		                location.params = {value:value}
+		                location.query = {valueq:"【test-query】"}
+		            }
+		            this.$router.push(location)
+		        }
+		}
+	6) 解决重复提交相同内容出错
+		找到路由器，重写push，replace
+
+		【示例修改push】
+		const originPush = VueRouter.prototype.push
+
+		VueRouter.prototype.push = function(location,onComplete,onAbort){
+		    if(!onComplete && !onAbort){
+		        return originPush.call(this,location).catch(err =>{
+		            console.log(err.message);        
+		        })
+		    }else{
+		        originPush.call(this,location,onComplete,onAbort)
+		    }
+		}
+	7）将路由参数映射成props , 在路由规则routes.js文件中，找到对应路由，设置props参数
+		{
+		        path:'/search/:value?',
+		        component:Search,
+		        name :'search',
+		        props:route => ({
+		            value3 : "测试第3个值",
+		            value4 : "测试第4个值"
+		        })
+		}
+	
+	  在Search组件中必须通过props接收上面的props对象参数
+
+
+
+
