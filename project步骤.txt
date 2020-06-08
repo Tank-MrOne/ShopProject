@@ -418,7 +418,181 @@
 		            state.categroyList = categroyList
 		        }
 		},
-16、导航栏动态数据，设置后天接口
+
+	9）在store文件夹下的index.js文件中导入刚写好的home数据管理文件，并添加到modules对象中
+	
+16、导航栏动态数据
+	1）找到components文件夹下的TypeNav组件，在里面导入通过后台获取到的三级分类数据
+		async mounted() {
+		    this.$store.dispatch('getCategroyList');
+		  },
+	
+	2）通过计算方式获取三级分类对象，并将数据引入到html结构中
+		computed:{
+		        	categroyList(){
+	            			return this.$store.state.home.categroyList
+	        		},
+    		},
 17、TypeNav交互效果
+	1）实现js鼠标移入移出切换效果，首先定义一个变量默认值为-1，表示子分类不显示
+		data() {
+		        return {
+		            currentIndex:-1,
+		        }
+		    },
+	2）然后在1级标签位置设置一个移入移出事件@mouseenter/@mouseleave,
+		鼠标移入的时候将currentIndex的值设置为对应的下标，然后在对应的标签中添加一个类名，这个类名item_on决定这个移入的子分类是否显示
+		methons:{
+			showSubScategorys(){
+		           		this.currentIndex = index
+			},
+		}
+		<div :class="{item_on: 标签的下标 === currentIndex}"></div>
+
+		鼠标移出的时候将currentIndex的值设置为-2,表示鼠标移出，-1代表鼠标在移入之前
+		methons:{
+			hideCate(){
+			            this.currentIndex = -2
+        			},
+		}
+		鼠标移入的时候添加一个设置，，判断currentIndex是否是-2，如果鼠标移出（-2），则不需要显示子分类
+		methons:{
+			showSubScategorys(){
+		           		if(this.currentIndex!==-2){
+                				this.currentIndex = index
+            				}
+			},
+		}
+
+	3）进行节流设置，导入lodash的throttle方法
+		import throttle  from "lodash/throttle"
+
+		然后在鼠标移入的时候进行200毫秒节流设置
+		showSubScategorys:throttle(function (index){
+		            if(this.currentIndex!==-2){
+		                this.currentIndex = index
+		            }
+		},200)
+	
+	4）设置分类栏只有在home首页显示，在搜索组件中只有通过鼠标移入才会显示
+		定义一个变量isShow来判断是否是主页
+		data() {
+		        return {
+            			isShow : this.$route.path === '/'
+        		        }
+    		},
+	5）设置鼠标移入导航的时候显示分类栏
+		<div @mouseenter="showCate">
+			导航栏
+			<div  v-show="isShow">分类栏</div>
+		</div>
+		showCate(){
+            			this.isShow = true
+            			this.currentIndex=-1
+        		}
+
+18、设置点击分类提交参数并跳转到搜索组件，
+	1）使用事件委派方法，在所有分类的共同祖先元素设置一个点击事件
+	 	<div @click="toSearch" ></div>
+	2）在点击事件中通过事件对象event的target.dataset方法可以获取点击标签的对应的属性值，所以我们把需要传递的参数以自定义属性添加
+		<a :data-categoryname="c1.categoryName" :data-category1id="c1.categoryId">{{c1.categoryName}}</a>
+		methons:{
+			toSearch(event){
+            				const {
+                			categoryname,
+                			category1id,
+                			category2id,
+                			category3id
+            			} = event.target.dataset
+		}
+
+		这样就能传递categoryname和category1id，category1id，category3id属性的值
+		
+	3）判断点击的标签是否能获取到categoryname的值，如果不能则不做任何操作
+		if(!categoryname) return
+
+	4）我们在事件中获取后，进行判断category1id，category1id，category3id中哪个是有值的，如果有值则存储到一个变量中
+		const query = {
+                		catagoryName : categoryname
+           		}
+            		if(category1id){
+               		query.category1Id = category1id
+            		}else if(category2id){
+                		query.category2Id = category2id
+            		}else if(category3id){
+                		query.category3Id = category3id
+            		}
+	
+	5）定义一个参数对象，并向指定路由发送数据
+		const location = {
+		                name : "search",
+		                query
+	            	}
+		this.$router.push(location)
+	
+	6）处理头部搜索框搜索数据的参数和点击分类搜索的数据进行合并
+		在分类栏中发送路由请求前进行判断搜索框的参数是否有值，如果有，则保存
+		if(value){
+                		location.params = {value}
+            		}
+		this.$router.push(location)
+		
+		发送数据后，将分类栏进行隐藏
+		this.hideCate()
+
+		在头部输入框输入数据后，发送路由请求前，也将分类栏的参数保存
+		location.query = this.$route.query
+            		this.$router.push(location)
+	
 18、mock模拟
 	1）安装依赖 npm i -S mockjs
+	2）在src目录下创建一个mock目录，并导入准备好的banner.json/data.json/floors.json三个文件放进去
+	3）在mock目录下创建一个mockServer.js文件
+	4）在文件中导入mock插件
+		import Mock from 'mockjs'
+	5）导入banner.json和floors.json两个文件
+		import banners from './banners.json'
+			banners里面存放了4张图片的地址，需要将这4个图片找到并放到public文件夹下的images文件夹里
+
+		import floors from './floors.json'
+
+	6）调用mock 的mock的方法，进行数据的随机处理，并设置路由拦截
+		Mock.mock('/mock/banners',{
+        			code : 200,
+        			data : banners
+		})
+
+		Mock.mock('/mock/floors',{
+        			code : 200,
+        			data : floors
+		})
+	7）在api目录下创建一个mockAjax.js文件专门处理mock请求
+		import axios from "axios"
+
+		const instance = axios.create({
+		    	baseURL : '/',
+		    	timeout : 15000
+		})
+
+		instance.interceptors.request.use(config => {
+    			return config
+		})
+
+		instance.interceptors.response.use(
+			response =>{
+        				return response.data
+    			},
+    			error =>{
+        				return  Promise.reject(error)
+    			}
+		)
+
+		export default instance	
+
+	8）在api目录下的index.js文件中导入mockAjax
+		import mockAjax from './mockAjax'
+	9）定义一个获取banner图片的api接口和获取楼层数据的api接口		
+		export const reqBanners = () => mockAjax('/mock/banners')
+		export const reqFloors = () => mockAjax('/mock/floors')
+		
+

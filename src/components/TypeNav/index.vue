@@ -79,6 +79,7 @@ export default {
                 this.currentIndex = index
             }
         },200),
+        
         hideCate(){
             this.currentIndex = -2
             if (this.$route.path!=='/') {
