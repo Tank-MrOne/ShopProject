@@ -363,20 +363,60 @@
 
 	2） 在src目录下的store文件夹下创建index.js文件
 		这个文件需要导入vue 和 vuex ,通过use（vuex）来使用vuex，并暴露出去
-		export default new Vuex.store({
-		    state,
+		const mutations = { }
+		const actions = { }
+		const getters = { }
+
+		export default new Vuex.Store({
 		    mutations,
 		    actions,
-    		    getters,
+		    getters,
 		    modules:{
-			
+		       
 		    }
 		})
 
 	3） 分别管理数据，在store目录下创建modules文件夹，在modules文件夹下创建单独的数据管理文件比如专门管理home组件数据的，home.js 
-		
+	4）在modules文件夹下的home.js文件中，首先我们要先导入之前我们定义的获取三级分类的api
+		import {获取三级分类的函数名} from '你的api路径'
+	5）并暴露vuex数据管理对象
+		export default {
+		    state : {
+        
+		    },
+
+		    mutations :{
+        
+		    },
+
+		    actions:{
+       
+		    },
+
+		    getters:{
+        
+		    }
+		}
 	
+	6）在actions对象中使用获取三级分类的api，并讲获取到的数据交给mutations处理
+		async getCategroyList({commit}){
+		            const result = await reqCategoryList()
+ 		           if(result.code === 200){
+ 		                const categroyList = result.data
+		                commit('mutations对应的函数名',categroyList)
+		            }
+		 }
+	
+	7）在state对象中创建一个属性用来接收三级分类的数据
+		state : {
+		        categroyList:[]
+		}
 
-
+	8）在mutations对象中处理actions提交发过来的数据
+		mutations :{
+		        receive_category_list(state,categroyList){
+		            state.categroyList = categroyList
+		        }
+		},
 16、导航栏动态数据，设置后天接口
-
+17、TypeNav交互效果

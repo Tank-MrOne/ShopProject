@@ -1,5 +1,6 @@
 <template>
     <div>
+        <TypeNav/>
         接收的params参数是:{{$route.params.value}}
         接收的query参数是:{{$route.query.valueq}}
         接收的query参数是:{{value3}}
@@ -8,11 +9,14 @@
 </template>
 
 <script>
-
+import TypeNav from '../../components/TypeNav'
 
 export default {
     name:"Search",
-    props:['value3','value4']
+    props:['value3','value4'],
+    comments:{
+        TypeNav
+    }
 }
 </script>
 
