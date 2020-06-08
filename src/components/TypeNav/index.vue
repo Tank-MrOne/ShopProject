@@ -65,13 +65,13 @@ export default {
         //     categroyList:state => state.home.categroyList
         // })
     },
-    mounted(){
-        // 常规写法
-        // this.$store.dispatch('getCategroyList')
+    // mounted(){
+    //     // 常规写法
+    //     // this.$store.dispatch('getCategroyList')
 
-        // ...map语法
-        this.getCategroyList()
-    },
+    //     // ...map语法
+    //     this.getCategroyList()
+    // },
     methods:{
         ...mapActions(['getCategroyList']),
         showSubScategorys:throttle(function (index){
@@ -86,7 +86,6 @@ export default {
             }
         },
         toSearch(event){
-            console.log(event.target.dataset)
             const {
                 categoryname,
                 category1id,
@@ -111,7 +110,10 @@ export default {
                 name : "search",
                 query
             }
-
+            const value = this.$route.params.value
+            if(value){
+                location.params = {value}
+            }
             this.$router.push(location)
             this.hideCate()
         },

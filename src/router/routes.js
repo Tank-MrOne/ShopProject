@@ -11,11 +11,11 @@ export default[
     {
         path:'/search/:value?',
         component:Search,
-        name :'search',
-        props:route => ({
-            value3 : "测试第3个值",
-            value4 : "测试第4个值"
-        })
+        name :'search'
+        // props:route => ({
+        //     value3 : "测试第3个值",
+        //     value4 : "测试第4个值"
+        // })
     },
     {
         path:'/register',

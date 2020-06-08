@@ -15,7 +15,10 @@ export default {
   name:'App',
   components:{
     Footer,Header
-  }
+  },
+  async mounted() {
+    this.$store.dispatch('getCategroyList');
+  },
 }
 </script>
 

@@ -76,6 +76,7 @@ export default {
                 location.params = {value:value}
                 location.query = {valueq:"【test-query】"}
             }
+            location.query = this.$route.query
             this.$router.push(location)
 
             // 4、解决重复提交相同代码出错
