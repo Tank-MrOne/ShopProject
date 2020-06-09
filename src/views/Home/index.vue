@@ -23,6 +23,9 @@ import Brand from '@/views/Home/Brand/Brand'
 
 export default {
     name:"Home",
+    mounted() {
+        this.$store.dispatch('getBanners')
+    },
     components:{
         ListContainer,
         Recommend,

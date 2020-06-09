@@ -4,7 +4,7 @@
         <div class="sortList clearfix">
             <div class="center">
                 <!--banner轮播-->
-                <div class="swiper-container" id="mySwiper">
+                <div class="swiper-container" ref="swiper">
                     <div class="swiper-wrapper">
                         <div class="swiper-slide">
                             <img src="./images/banner1.jpg" />
@@ -117,7 +117,8 @@ import 'swiper/css/swiper.min.css'
 export default {
     name:"",
     mounted() {
-        new Swiper ('.swiper-container', {
+        new Swiper (this.$refs.swiper, {
+        // new Swiper ('.swiper-container', {
             loop: true, // 循环模式选项
             autoplay : true,
             // 如果需要分页器
