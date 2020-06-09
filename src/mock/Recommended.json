@@ -1,0 +1,18 @@
+[
+        {
+                "id": "1",
+                "imgUrl": "/images/today01.jpg"
+        },
+        {
+                "id": "2",
+                "imgUrl": "/images/today02.jpg"
+        },
+        {
+                "id": "3",
+                "imgUrl": "/images/today03.jpg"
+        },
+        {
+                "id": "4",
+                "imgUrl": "/images/today04.jpg"
+        }
+]

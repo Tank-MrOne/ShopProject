@@ -1,4 +1,4 @@
-import {reqCategoryList, reqBanners} from '../../api'
+import {reqCategoryList, reqBanners,reqFloors} from '../../api'
 
 export default {
     state : {
@@ -20,7 +20,6 @@ export default {
     },
 
     actions:{
-        //发起请求
        async getCategroyList({commit}){
             const result = await reqCategoryList()
             if(result.code === 200){
@@ -29,20 +28,18 @@ export default {
                 commit('receive_category_list',categroyList)
             }
         },
-
-        async getBanners({commit}){
-            const result = await reqBanners()
-            if(result.code === 200){
-                const banners = result.data
-                commit('receive_banners',banners)
-            }
-        },
-
         async getFloors({commit}){
             const result = await reqFloors()
             if(result.code === 200){
                 const floors = result.data
                 commit('receive_floors',floors)
+            }
+        },
+        async getBanners({commit}){
+            const result = await reqBanners()
+            if(result.code === 200){
+                const banners = result.data
+                commit('receive_banners',banners)
             }
         }
     },

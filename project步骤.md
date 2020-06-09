@@ -62,7 +62,7 @@
    ```
 
 2. 全局设置：单个规则设置
-  ` 找到package.json文件，找到rules属性,设置规则`
+    ` 找到package.json文件，找到rules属性,设置规则`
 
   ``` js
   比如：
@@ -835,6 +835,8 @@
 10. 在store文件夹中的modules里的home.js文件中，定义获取banner和floors数据的函数
 
     ```js
+    import {reqBanners,reqFloors} from '../../api'
+    
     export default {
         state : {
             banners:[],
@@ -867,9 +869,9 @@
                 }
             }
         },
-    }
+}
     ```
-
+    
     
 
 ## 20、实现轮播图效果
@@ -930,3 +932,177 @@
 
 5. 动态获取banner图片的数据，通过banner的api与store是数据结合,在ListContainer组件加载完成后，用计算方式获取banner图片数据
 
+   `在Home组件下的index.vue中通过调用接口发送banners和floors的请求`
+
+   ```js
+   mounted() {
+   	this.$store.dispatch('getBanners')
+   	this.$store.dispatch('getFloors')
+   },
+   ```
+
+   `然后在ListContainer组件中通过计算属性获取banner`
+
+   ```js
+   import {mapState} from 'vuex'
+   computed: {
+   	...mapState({
+   		banners : state => state.home.banners
+   	})
+   },
+   ```
+
+   `直接在Home组件下的index.vue文件中通过计算属性得到floors数据`
+
+   ```js
+   import {mapState} from 'vue'
+   computed: {
+       ...mapState({
+           floors : state => state.home.floors
+       })
+   },
+   ```
+
+6. 通过v-for将获取的banner数据动态显示
+
+7. 解决banner轮播图不自动轮播
+
+   1. 首先我们将swiper的轮播js代码封装起来
+
+      ```js
+      mounted:{
+          srollImg(){
+              new Swiper (this.$refs.swiper, {
+              // new Swiper ('.swiper-container', {
+                  loop: true, // 循环模式选项
+                  autoplay : true,
+                  // 如果需要分页器
+                  pagination: {
+                      el: '.swiper-pagination',
+                  },
+                  
+                  // 如果需要前进后退按钮
+                  navigation: {
+                      nextEl: '.swiper-button-next',
+                      prevEl: '.swiper-button-prev',
+                  },
+              })  
+          } 
+      },
+      ```
+
+   2. 然后添加监听属性，调用vue的nextTick方法，效果是当时页面数据改变后页面并加载完成则调用swiper
+
+      ```js
+      watch:{
+          banners(value){
+              this.$nextTick(() =>{
+                  this.srollImg()
+              })
+          }
+      },
+      ```
+
+8. 将轮播组件单独抽离方便复用，在components目录下创建一个Carousel组件，并修改数据为通用对象，声明props参数用来接收一个数组
+
+   ```vue
+   <template>
+     <div class="swiper-container" ref="swiper">
+       <div class="swiper-wrapper">
+         <div v-for="(item, index) in carouseList" :key="item.id" class="swiper-slide">
+           <img :src="item.imgUrl" />
+         </div>
+       </div>
+       <!-- 如果需要分页器 -->
+       <div class="swiper-pagination"></div>
+   
+       <!-- 如果需要导航按钮 -->
+       <div class="swiper-button-prev"></div>
+       <div class="swiper-button-next"></div>
+     </div>
+   </template>
+   
+   <script type="text/ecmascript-6">
+   import Swiper from 'swiper'
+   
+   export default {
+     name: "Carousel",
+     props:{
+           carouseList : Array,
+           autoplay:true        
+     },
+     watch:{
+           carouseList(value){
+               this.$nextTick(() =>{
+                   this.srollImg()
+               })
+           }
+       },
+       mounted:{
+           srollImg(){
+               new Swiper (this.$refs.swiper, {
+               // new Swiper ('.swiper-container', {
+                   loop: true, // 循环模式选项
+                   autoplay : true,
+                   // 如果需要分页器
+                   pagination: {
+                       el: '.swiper-pagination',
+                   },
+                   
+                   // 如果需要前进后退按钮
+                   navigation: {
+                       nextEl: '.swiper-button-next',
+                       prevEl: '.swiper-button-prev',
+                   },
+               })  
+           } 
+       },
+   };
+   </script>
+   ```
+
+9. 将Carousel组件做一个全局暴露,找到main.js入口文件，导入并注册
+
+   ```js
+   import Carousel from './components/Carousel'
+   Vue.component('Carousel',Carousel)
+   ```
+
+10. 然后将全局Carousel组件放到对应需要轮播图的组件中，并传入一个数组参数，如果需要设置是否自动轮播也可以通过参数传入
+
+    ```js
+    <Carousel :carouselList="banners" autoplay/>
+    ```
+
+11. 实现Floors组件动态生成，首先在Home组件下通过v-for获取Floors的动态数据，然后再向子组件传递单个对象数据
+
+    ```html
+    <Floor v-for="(floor, index) in floors" :key="floor.id" :floor="floor"/>
+    ```
+
+12. 然后在floor组件中获取父组件传递进来的对象数据，将数据动态显示在页面中
+
+    ```js
+    export default {
+        props:['floor']
+    }
+    ```
+
+13. 解决floors轮播图初始化不能滚动方法
+
+    ```js
+    watch: {
+        carouselList: {
+          // 监视的回调
+          handler(value) {
+            if (this.carouseList.length === 0) return;
+            this.$nextTick(() => {
+              this.srollImg();
+            })
+          },
+          immediate: true
+        }
+    }
+    ```
+
+    

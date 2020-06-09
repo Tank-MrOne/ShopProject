@@ -5,7 +5,9 @@ import store from './store'
 import './mock/mokeServer'
 
 import TypeNav from './components/TypeNav'
+import Carousel from './components/Carousel'
 Vue.component('TypeNav',TypeNav)
+Vue.component('Carousel',Carousel)
 
 new Vue({
   el:"#app",

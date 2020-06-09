@@ -16,3 +16,4 @@ export const reqCategoryList = () => ajax('/product/getBaseCategoryList')
 export const reqBanners = () => mockAjax('/mock/banners')
 
 export const reqFloors = () => mockAjax('/mock/floors')
+
