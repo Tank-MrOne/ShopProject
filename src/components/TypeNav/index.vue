@@ -97,7 +97,7 @@ export default {
             if(!categoryname) return
 
             const query = {
-                catagoryName : categoryname
+                categoryName : categoryname
             }
             if(category1id){
                 query.category1Id = category1id

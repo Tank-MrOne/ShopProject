@@ -1211,6 +1211,45 @@
 
 6. 在Search组件下通过后台获取的数据动态展示goodsList数据，在子组件SearchSelector中通过后台获取的数据动态展示attrsList和trademarkList数据
 
+7. 实现点击三级分类列表项和搜索框发送请求，把路由的参数一同发送到后台，首先我们在页面加载完成后，将路由的参数更新到option对象中，然后直接发送option对象
+
+   ```js
+   beforeMount() {
+     const {category1Id,category2Id,category3Id,categoryName} = this.$route.query
+     const keyword = this.$route.params.value
+     this.options = {
+       ...this.options,
+       category1Id,
+       category2Id,
+       category3Id,
+       categoryName,
+       keyword
+     }
+   }
+   ```
+
+8. 因为在相同路由下不会再次调用mount，导致无法再次发送请求，所以我们需要监视参数是否发生变化，一旦变化再次发生请求
+
+   ```js
+   watch: {
+       $route() {
+         	const {category1Id,category2Id,category3Id,categoryName} = this.$route.query
+     		const keyword = this.$route.params.value
+     		this.options = {
+       		...this.options,
+       		category1Id,
+       		category2Id,
+       		category3Id,
+       		categoryName,
+       		keyword
+       	}
+           this.getProductList()
+   	}
+   }
+   ```
+
+   
+
 ## 22、动态生成进入推荐图片
 
  1. 首先自定义mock文件生成模拟图片的json文件
