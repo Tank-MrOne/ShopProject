@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 
 import home from '@/store/modules/home'
 import users from '@/store/modules/users'
+import search from '@/store/modules/search'
 
 Vue.use(Vuex)
 
@@ -15,6 +16,6 @@ export default new Vuex.Store({
     actions,
     getters,
     modules:{
-        home,users
+        home,users,search
     }
 })

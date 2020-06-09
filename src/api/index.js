@@ -17,3 +17,13 @@ export const reqBanners = () => mockAjax('/mock/banners')
 
 export const reqFloors = () => mockAjax('/mock/floors')
 
+export const reqRecommend = () => mockAjax('/mock/recommend')
+
+export function reqProductList(options){
+    return ajax({
+        url:'/list',
+        method:'POST',
+        data:options
+    })
+}
+

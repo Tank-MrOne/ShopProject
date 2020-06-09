@@ -9,17 +9,8 @@
                         <h3>今日推荐</h3>
                     </div>
                 </li>
-                <li class="banner">
-                    <img src="./images/today01.png" />
-                </li>
-                <li class="banner">
-                    <img src="./images/today02.png" />
-                </li>
-                <li class="banner">
-                    <img src="./images/today03.png" />
-                </li>
-                <li class="banner">
-                    <img src="./images/today04.png" />
+                <li v-for="(item, index) in recommend" :key="item.id" class="banner">
+                    <img :src="item.imgUrl" />
                 </li>
             </ul>
         </div>
@@ -27,8 +18,16 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
 export default {
-    
+    computed: {
+        ...mapState({
+            recommend : state => state.home.recommend
+        })
+    },
+    mounted() {
+        this.$store.dispatch('getRecommend')
+    },
 }
 </script>
 

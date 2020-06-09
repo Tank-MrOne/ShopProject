@@ -344,9 +344,11 @@
    ```
 
 ## 13、Home组件及组件进行拆分
-	1. 找到Home路由，将静态页面的Home内容全部粘贴到路由中
- 	2. 创建各个组件，名字随意，导入对应的css和图片文件
- 	3. 为了渲染效果好，建议注释掉轮播图的其他图片，只留一张
+1. 找到Home路由，将静态页面的Home内容全部粘贴到路由中
+
+2.  创建各个组件，名字随意，导入对应的css和图片文件
+
+3. 为了渲染效果好，建议注释掉轮播图的其他图片，只留一张
 
 ## 14、进行ajax与后台进行交互
 1. 下载依赖 npm i -S axios nprogress
@@ -1105,4 +1107,208 @@
     }
     ```
 
-    
+## 21、search组件动态数据展示
+
+ 1. 首先找到静态组件中的search目录，将已经写好的images、SearchSelector文件夹，和index.vue粘贴到我们的search组件下
+
+ 2. 在api目录下的index.js文件下定义一个获取search列表的数据接口,需要接收一个参数 options
+
+    ```js
+    export function reqProductList(options){
+        return ajax({
+            url:'/list',
+            method:'POST',
+            data:options
+        })
+    }
+    ```
+
+3. 在stroe目录下的modules文件夹中创建一个管理search组件的vuex文件search.js
+
+   ```js
+   import {reqProductList} from '../../api'
+   
+   export default {
+           state:{
+                   productList : {}
+           },
+           mutations :{
+                   receive_product_list(state,productList){
+                           state.productList = productList
+                   }
+           },
+           actions:{
+                   async getProductList({commit},options){
+                           const result = await reqProductList(options)
+                           if(result.code === 200){
+                                   const productList = result.data
+                                   commit('receive_product_list',productList)
+                           }
+                   }
+           },
+       	getters:{
+                 trademarkList(state){
+                       return state.productList.trademarkList  || []
+                 }  ,
+                 attrsList(state){
+                         return state.productList.attrsList || []
+                 }
+           }
+   }
+   ```
+
+4. 然后再store目录下的index.js文件中导入刚才的vuex管理对象
+
+   ```js
+   import search from '@/store/modules/search'
+   
+   export default new Vuex.Store({
+       mutations,
+       actions,
+       getters,
+       modules:{
+           home,users,search
+       }
+   })
+   ```
+
+5. 在search组件中通过dispatch来获取后台发送的数据
+
+   ```js
+   import {mapState} from 'vuex'
+   export default {
+     data() {
+       return {
+         options:{
+           category1Id:'',
+           category2Id:'',
+           category3Id:'',
+           categoryName:'',
+           keyword:'',
+           props:[],
+           trademark:'',
+           order:'1:desc',
+           pageNo:1,
+           pageSize:5
+         }
+       }
+     },
+     mounted() {
+       this.getProductList()
+     },
+     computed: {
+       ...mapState({
+         productList : state => state.search.productList
+       })
+     },
+     methods: {
+       getProductList(){
+         this.$store.dispatch('getProductList',this.options)
+       }
+     },
+   }
+   ```
+
+6. 在Search组件下通过后台获取的数据动态展示goodsList数据，在子组件SearchSelector中通过后台获取的数据动态展示attrsList和trademarkList数据
+
+## 22、动态生成进入推荐图片
+
+ 1. 首先自定义mock文件生成模拟图片的json文件
+
+    ```json
+    [
+            {
+                    "id": "1",
+                    "imgUrl": "/images/today01.png"
+            },
+            {
+                    "id": "2",
+                    "imgUrl": "/images/today02.png"
+            },
+            {
+                    "id": "3",
+                    "imgUrl": "/images/today03.png"
+            },
+            {
+                    "id": "4",
+                    "imgUrl": "/images/today04.png"
+            }
+    ]
+    ```
+
+2. 在mockServer.js文件中定义recommend的路由
+
+   ```js
+   import recommend from './recommend.json'
+   Mock.mock('/mock/recommend',{
+           code:200,
+           data:recommend
+   })
+   ```
+
+3. 在api目录下的index.js文件中定义获取图片数据的接口
+
+   ```js
+   export const reqRecommend = () => mockAjax('/mock/recommend')
+   ```
+
+4. 在store目录下的home管理数据文件中添加对recommend管理的代码
+
+   ```js
+   import {reqRecommend} from '../../api'
+   export default {
+       state : {
+           recommend:[]
+       },
+   
+       mutations :{
+           receive_recommend_list(state,recommend){
+               state.recommend = recommend
+           }
+       },
+   
+       actions:{
+           async getRecommend({commit}){
+               const result = await reqRecommend()
+               if(result.code === 200){
+                   const recommend = result.data
+                   commit('receive_recommend_list',recommend)
+               }
+           }
+       },
+   
+       getters:{}
+   }
+   ```
+
+5. 找到recommend组件，通过刚定义的接口发送请求，获取数据并动态显示到页面上
+
+   ```html
+   <ul class="recommend">
+       <li class="clock">
+           <div class="time">
+               <img src="./images/clock.png" />
+               <h3>今日推荐</h3>
+           </div>
+       </li>
+       <li v-for="(item, index) in recommend" :key="item.id" class="banner">
+           <img :src="item.imgUrl" />
+       </li>
+   </ul>
+   ```
+
+   ```js
+   import {mapState} from 'vuex'
+   export default {
+       computed: {
+           ...mapState({
+               recommend : state => state.home.recommend
+           })
+       },
+       mounted() {
+           this.$store.dispatch('getRecommend')
+       },
+   }
+   ```
+
+   
