@@ -9,7 +9,7 @@
                         <div class="swiper-slide">
                             <img src="./images/banner1.jpg" />
                         </div>
-                        <!-- <div class="swiper-slide">
+                        <div class="swiper-slide">
                             <img src="./images/banner2.jpg" />
                         </div>
                         <div class="swiper-slide">
@@ -17,7 +17,7 @@
                         </div>
                         <div class="swiper-slide">
                             <img src="./images/banner4.jpg" />
-                        </div> -->
+                        </div>
                     </div>
                     <!-- 如果需要分页器 -->
                     <div class="swiper-pagination"></div>
@@ -111,10 +111,27 @@
 </template>
 
 <script>
-
+import Swiper from 'swiper'
+import 'swiper/css/swiper.min.css'
 
 export default {
     name:"",
+    mounted() {
+        new Swiper ('.swiper-container', {
+            loop: true, // 循环模式选项
+            autoplay : true,
+            // 如果需要分页器
+            pagination: {
+                el: '.swiper-pagination',
+            },
+            
+            // 如果需要前进后退按钮
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        })   
+    },
 }
 </script>
 

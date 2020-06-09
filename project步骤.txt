@@ -595,4 +595,24 @@
 		export const reqBanners = () => mockAjax('/mock/banners')
 		export const reqFloors = () => mockAjax('/mock/floors')
 		
+19、实现轮播图效果
+	1）安装swiper组件 npm i -S swiper
+	2）找到home组件下的ListContainer组件，导入swiper和swiper.min.css
+		import Swiper from 'swiper'
+		import from 'swiper/css/swiper.min.css'
+	3）参考swiper官方文档将ListContainer的结构和编写好，js代码需要在页面数据加载完成后才有效果
+		mounted() {
+		        	new Swiper ('.swiper-container', {
+            				loop: true, 
+            				autoplay : true,
 
+            				pagination: {
+                				el: '.swiper-pagination',
+            				},
+            
+            				navigation: {
+                				nextEl: '.swiper-button-next',
+                				prevEl: '.swiper-button-prev',
+            				},
+        			})   
+    		},
