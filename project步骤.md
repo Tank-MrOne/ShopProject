@@ -1215,7 +1215,7 @@
 
    ```js
    beforeMount() {
-     const {category1Id,category2Id,category3Id,categoryName} = this.$route.query
+     const {category1Id='',category2Id='',category3Id='',categoryName=''} = this.$route.query
      const keyword = this.$route.params.value
      this.options = {
        ...this.options,
@@ -1233,7 +1233,7 @@
    ```js
    watch: {
        $route() {
-         	const {category1Id,category2Id,category3Id,categoryName} = this.$route.query
+         	const {category1Id='',category2Id='',category3Id='',categoryName=''} = this.$route.query
      		const keyword = this.$route.params.value
      		this.options = {
        		...this.options,
@@ -1350,4 +1350,188 @@
    }
    ```
 
+## 23、search组件实现分页按钮效果
+
+1. 首先在components文件夹下创建新的组件Pagination，然后把动态组件代码编写好
+
+   ```vue
+   <template>
+     <div class="pagination">
+       <!-- 当前页码等于1就不可操作 -->
+       <button :disabled="mcPage===1" @click="changeCurrentPage(mcPage-1)">上一页</button>
+       <!-- 只有start大于1 -->
+       <button v-if="startEnd.start>1" @click="changeCurrentPage(1)">1</button>
+       <!-- 只有start大于2 -->
+       <button disabled v-if="startEnd.start>2">···</button>
+       <!-- 连续页码 -->
+       <button
+         v-for="item in startEnd.end"
+         v-if="item>=startEnd.start"
+         :key="item"
+         @click="changeCurrentPage(item)"
+         :class="{active: mcPage===item}"
+       >{{item}}</button>
+       <!-- 只有end<totalPages-1才显示  -->
+       <button disabled v-if="startEnd.end<totalPages-1">···</button>
+       <!-- 只有end<totalPages才显示 -->
+       <button v-if="startEnd.end<totalPages" @click="changeCurrentPage(totalPages)">{{totalPages}}</button>
+       <!-- 当前页码等于总页码就不可操作 -->
+       <button :disabled="mcPage===totalPages" @click="changeCurrentPage(mcPage+1)">下一页</button>
+       <!-- 总记录数 -->
+       <button style="margin-left: 30px">共 {{total}} 条</button>
+     </div>
+   </template>
    
+   <script>
+   export default {
+     name: "Pagination",
+     props: {
+       currentPage: {
+         type: Number, // 当前页码
+         default: 1
+       },
+       pageSize: {
+         type: Number, // 每页数量
+         default: 5
+       },
+       total: {
+         type: Number, // 总数量
+         default: 0
+       },
+       showPageNo: {
+         type: Number, // 连续页码数
+         default: 5
+       }
+     },
+   
+     data() {
+       return {
+         mcPage: this.currentPage // 保存自己的当前页码
+       };
+     },
+   
+     computed: {
+       /* 
+         总页码数 依赖数据:  总数量: total  每页数量: pageSize  
+         */
+       totalPages() {
+         const { total, pageSize } = this;
+         return Math.ceil(total / pageSize);
+       },
+   
+       startEnd() {
+         const { mcPage, showPageNo, totalPages } = this;
+         let start = mcPage - Math.floor(showPageNo / 2); 
+         if (start < 1) {
+           start = 1;
+         }
+         let end = start + showPageNo - 1; 
+         if (end > totalPages) {
+           end = totalPages;
+           start = end - showPageNo + 1;
+           if (start < 1) {
+             start = 1;
+           }
+         }
+   
+         return { start, end };
+       }
+     },
+   
+     watch: {
+       currentPage(value) {
+         // 将当前页码指定为外部传入的值
+         this.mcPage = value;
+       }
+     },
+   
+     methods: {
+       changeCurrentPage(page) {
+         // 修改当前页码
+         this.mcPage = page;
+         // 通知外部父组件
+         this.$emit("currentChange", page);
+       }
+     }
+   };
+   </script>
+   
+   <style lang="less" scoped>
+   .pagination {
+     button {
+       margin: 0 5px;
+       background-color: #f4f4f5;
+       color: #606266;
+       outline: none;
+       border-radius: 2px;
+       padding: 0 4px;
+       vertical-align: top;
+       display: inline-block;
+       font-size: 13px;
+       min-width: 35.5px;
+       height: 28px;
+       line-height: 28px;
+       cursor: pointer;
+       box-sizing: border-box;
+       text-align: center;
+       border: 0;
+   
+       &[disabled] {
+         color: #c0c4cc;
+         cursor: not-allowed;
+       }
+   
+       &.active {
+         cursor: not-allowed;
+         background-color: #409eff;
+         color: #fff;
+       }
+     }
+   }
+   </style>
+   
+   ```
+
+2. 在main.js中将Pagination组件注册为全局组件
+
+   ```js
+   import Pagination from './components/Pagination'
+   Vue.component('Pagination',Pagination)
+   ```
+
+3. 在search组件中将全局组件Pagination放在指定的位置(代替之前的class为fr page标签)然后，然后传入子组件需要的参数，来修改分页显示的效果
+
+   ```html
+   <Pagination 
+   :currentPage="options.pageNo" 
+   :pagesize="options.pageSize" 
+   :total="productList.total" 
+   :showPageNo="3" 
+   @currentChange="getProductList"/>
+   ```
+
+   `currentPage 表示分页的当前页码`
+
+   `pagesize 表示每个分页显示多少商品`
+
+   `total 表示一共有多少个商品`
+
+   `showPageNo 表示分页按钮显示多少个`
+
+   `@currentChange 是子组件分发给父组件的函数，可以通过这个函数点击更新分页`
+
+4. 修改getProductList发生请求的函数，可让每次请求现在指定的页码，默认是第一页
+
+   ```js
+   methods: {
+     getProductList(pageNo=1) {
+       this.options.pageNo = pageNo
+       this.$store.dispatch("getProductList", this.options);
+     }
+   }
+   ```
+
+   
+
+
+

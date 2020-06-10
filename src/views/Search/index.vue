@@ -96,39 +96,7 @@
               </li>
             </ul>
           </div>
-          <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted">
-                  <span>...</span>
-                </li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div>
-                <span>共10页&nbsp;</span>
-              </div>
-            </div>
-          </div>
+          <Pagination :currentPage="options.pageNo" :pagesize="options.pageSize" :total="productList.total" :showPageNo="3" @currentChange="getProductList"/>
         </div>
       </div>
     </div>
@@ -152,7 +120,7 @@ export default {
         trademark: "",
         order: "1:desc",
         pageNo: 1,
-        pageSize: 10
+        pageSize: 5
       }
     };
   },
@@ -177,15 +145,16 @@ export default {
     SearchSelector
   },
   methods: {
-    getProductList() {
+    getProductList(pageNo=1) {
+      this.options.pageNo = pageNo
       this.$store.dispatch("getProductList", this.options);
     },
     updateOptions(){
       const {
-        category1Id,
-        category2Id,
-        category3Id,
-        categoryName
+        category1Id = '',
+        category2Id = '',
+        category3Id = '',
+        categoryName = ''
       } = this.$route.query;
       const keyword = this.$route.params.value;
       this.options = {
