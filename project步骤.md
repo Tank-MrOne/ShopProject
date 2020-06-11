@@ -1820,10 +1820,46 @@
 
    * 创建一个点击函数
 
-     ```
+     ```js
      method:{
-     	
+     	setOrder(flag){
+           let [orderFlag,orderType] = this.options.order.split(':')
+           if(orderFlag === flag){
+             orderType = orderType === 'asc' ? 'desc' : 'asc'
+           }else{
+             orderFlag = flag
+             orderType = 'desc'
+           }
+           this.options.order = orderFlag + ':' + orderType
+           this.getProductList()
+         }
      }
+     ```
+
+   * 在综合和价格标签上添加这个点击事件，并传入标识的数据
+
+     ```html
+     <ul class="sui-nav">
+       <li :class="{active : isActive('1')}">
+         <a href="javascript:;" @click="setOrder('1')">综合
+           <i class="iconfont" v-if="isActive('1')" :class="iconClass"></i>
+         </a>
+       </li>
+       <li>
+         <a href="#">销量</a>
+       </li>
+       <li>
+         <a href="#">新品</a>
+       </li>
+       <li>
+         <a href="#">评价</a>
+       </li>
+       <li :class="{active : isActive('2')}">
+         <a href="javascript:;"  @click="setOrder('2')">价格
+           <i class="iconfont" v-if="isActive('2')" :class="iconClass"></i>
+         </a>
+       </li>
+     </ul>
      ```
 
      
