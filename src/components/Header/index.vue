@@ -52,6 +52,11 @@ export default {
             value: ""
         }
     },
+    mounted() {
+        this.$bus.$on('removeKeyword',()=>{
+            this.value = ''
+        })
+    },
     methods:{
         
         search(){
@@ -77,7 +82,12 @@ export default {
                 location.query = {valueq:"【test-query】"}
             }
             location.query = this.$route.query
-            this.$router.push(location)
+            if(this.$route.name !== 'search'){
+                this.$router.push(location)
+            }else{
+                this.$router.replace(location)
+            }
+            
 
             // 4、解决重复提交相同代码出错
             // this.$router.push(location)

@@ -115,7 +115,11 @@ export default {
             if(value){
                 location.params = {value}
             }
-            this.$router.push(location)
+            if(this.$route.name !== 'search'){
+                this.$router.push(location)
+            }else{
+                this.$router.replace(location)
+            }
             this.hideCate()
         },
         showCate(){

@@ -11,49 +11,53 @@
             </li>
           </ul>
           <ul class="fl sui-tag">
-            <li class="with-x">手机</li>
-            <li class="with-x">
-              iphone
-              <i>×</i>
+            <li v-if="options.categoryName" class="with-x">
+              {{options.categoryName}}
+              <i  @click="removeCategory">×</i>
+              </li>
+            <li v-if="options.keyword" class="with-x">
+              {{options.keyword}}
+              <i  @click="removeKeyword">×</i>
             </li>
-            <li class="with-x">
-              华为
-              <i>×</i>
+            <li v-if="options.trademark" class="with-x">
+              {{options.trademark}}
+              <i  @click="removeTrademark">×</i>
             </li>
-            <li class="with-x">
-              OPPO
-              <i>×</i>
+            <li v-for="(prop, index) in options.props" :key="prop" class="with-x">
+              {{prop}}
+              <i  @click="removeProp(index)">×</i>
             </li>
           </ul>
         </div>
 
         <!--selector-->
-        <SearchSelector />
+        <SearchSelector :setTrademark="setTrademark" @addProp="addProp"/>
 
         <!--details-->
         <div class="details clearfix">
           <div class="sui-navbar">
             <div class="navbar-inner filter">
-              <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
-                </li>
-                <li>
-                  <a href="#">销量</a>
-                </li>
-                <li>
-                  <a href="#">新品</a>
-                </li>
-                <li>
-                  <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
-                  <a href="#">价格⬇</a>
-                </li>
-              </ul>
+            <ul class="sui-nav">
+              <li :class="{active : isActive('1')}">
+                <a href="javascript:;" @click="setOrder('1')">综合
+                  <i class="iconfont" v-if="isActive('1')" :class="iconClass"></i>
+                </a>
+              </li>
+              <li>
+                <a href="#">销量</a>
+              </li>
+              <li>
+                <a href="#">新品</a>
+              </li>
+              <li>
+                <a href="#">评价</a>
+              </li>
+              <li :class="{active : isActive('2')}">
+                <a href="javascript:;"  @click="setOrder('2')">价格
+                  <i class="iconfont" v-if="isActive('2')" :class="iconClass"></i>
+                </a>
+              </li>
+            </ul>
             </div>
           </div>
           <div class="goods-list">
@@ -96,7 +100,7 @@
               </li>
             </ul>
           </div>
-          <Pagination :currentPage="options.pageNo" :pagesize="options.pageSize" :total="productList.total" :showPageNo="3" @currentChange="getProductList"/>
+          <Pagination :currentPage="options.pageNo" :pageSize="options.pageSize" :total="productList.total" :showPageNo="3" @currentChange="getProductList" @setTrademark="setTrademark"/>
         </div>
       </div>
     </div>
@@ -139,32 +143,80 @@ export default {
   computed: {
     ...mapState({
       productList: state => state.search.productList
-    })
+    }),
+    iconClass(){
+      return this.options.order.split(':')[1] === 'asc' ? 'icon-jiantou-copy-copy':'icon-jiantou'
+    }
   },
   components: {
     SearchSelector
   },
-  methods: {
-    getProductList(pageNo=1) {
-      this.options.pageNo = pageNo
-      this.$store.dispatch("getProductList", this.options);
+    methods: {
+      getProductList(pageNo=1) {
+        this.options.pageNo = pageNo
+        this.$store.dispatch("getProductList", this.options);
+      },
+      updateOptions(){
+        const {
+          category1Id = '',
+          category2Id = '',
+          category3Id = '',
+          categoryName = ''
+        } = this.$route.query;
+        const keyword = this.$route.params.value;
+        this.options = {
+          ...this.options,
+          category1Id,
+          category2Id,
+          category3Id,
+          categoryName,
+          keyword
+        };
+      },
+    removeCategory(){
+      this.options.categoryName = '',
+      this.options.category1Id = '',
+      this.options.category2Id = '',
+      this.options.category3Id = '',
+      this.$router.replace({name:'search',params:this.$router.params})
+      
     },
-    updateOptions(){
-      const {
-        category1Id = '',
-        category2Id = '',
-        category3Id = '',
-        categoryName = ''
-      } = this.$route.query;
-      const keyword = this.$route.params.value;
-      this.options = {
-        ...this.options,
-        category1Id,
-        category2Id,
-        category3Id,
-        categoryName,
-        keyword
-      };
+    removeKeyword(){
+      this.options.keyword = ''
+      this.$router.replace({name:'search',params:this.$router.query})
+      this.$bus.$emit('removeKeyword')
+    },
+    removeTrademark(){
+      this.options.trademark = ''
+      this.getProductList()
+    },
+    setTrademark(trademark){
+      if(this.options.trademark === trademark) return
+      this.options.trademark = trademark
+      this.getProductList()
+    },
+    addProp(prop){
+      if(this.options.props.indexOf(prop) >= 0) return
+      this.options.props.push(prop)
+      this.getProductList()
+    },
+    removeProp(index){
+      this.options.props.splice(index,1)
+      this.getProductList()
+    },
+    isActive(num){
+      return this.options.order.indexOf(num) === 0
+    },
+    setOrder(flag){
+      let [orderFlag,orderType] = this.options.order.split(':')
+      if(orderFlag === flag){
+        orderType = orderType === 'asc' ? 'desc' : 'asc'
+      }else{
+        orderFlag = flag
+        orderType = 'desc'
+      }
+      this.options.order = orderFlag + ':' + orderType
+      this.getProductList()
     }
   }
 };

@@ -957,7 +957,7 @@
    `直接在Home组件下的index.vue文件中通过计算属性得到floors数据`
 
    ```js
-   import {mapState} from 'vue'
+   import {mapState} from 'vuex'
    computed: {
        ...mapState({
            floors : state => state.home.floors
@@ -1531,7 +1531,302 @@
    }
    ```
 
-   
+## 24、优化根据分类和关键字进行搜索
+
+1. 在search组件中定义一个函数，用来处理当分类或关键字发生变化时，修改options的值，这个函数在页面渲染前就触发
+
+   ```js
+   beforeMount() {
+       this.updateOptions()
+   },
+   methods: {
+     updateOptions(){
+       const {
+         category1Id = '',
+         category2Id = '',
+         category3Id = '',
+         categoryName = ''
+       } = this.$route.query;
+       const keyword = this.$route.params.value;
+       this.options = {
+         ...this.options,
+         category1Id,
+         category2Id,
+         category3Id,
+         categoryName,
+         keyword
+       };
+     },
+   }
+   ```
+
+2. 监听路由参数发生变化后，获取最新的路由参数变化，调用updateOptions函数，并发送请求
+
+   ```js
+   watch: {
+       $route() {
+         this.updateOptions()
+         this.getProductList()
+       }
+   },
+   ```
+
+3. 在页面上显示搜索的分类和关键字数据，在“全部结果”的下面ul标签中，将li里的数据动态展示,，使用v-if判断搜索的param值或query值有没有，没有则不显示
+
+   ```html
+   <ul class="fl sui-tag">
+   	<li v-if="options.categoryName" class="with-x">
+   		{{options.categoryName}}
+   		<i>×</i>
+   	</li>
+   	<li v-if="options.keyword" class="with-x">
+   		{{options.keyword}}
+   		<i>×</i>
+   	</li>
+   </ul>
+   ```
+
+4. 创建一个删除条件的函数，并给 x 按钮绑定,这个删除条件的函数没执行后，将路由重新跳转
+
+   ```html
+   <ul class="fl sui-tag">
+   	<li v-if="options.categoryName" class="with-x">
+   		{{options.categoryName}}
+   		<i @click="removeCategory">×</i>
+   	</li>
+   	<li v-if="options.keyword" class="with-x">
+   		{{options.keyword}}
+   		<i @click="removeKeyword">×</i>
+   	</li>
+   </ul>
+   ```
+
+   ```js
+   methods:{
+   	removeCategory(){
+         this.options.categoryName = '',
+         this.options.category1Id = '',
+         this.options.category2Id = '',
+         this.options.category3Id = '',
+         this.$router.replace({name:'search',params:this.$router.params})   
+       },
+       removeKeyword(){
+         this.options.keyword = ''
+         this.$router.replace({name:'search',params:this.$router.query})
+       },
+   }
+   ```
+
+5. 删除关键字query参数后，实现输入框内的内容也同时删除，因为输入框的组件在header组件中，所以我们需要采用全局事件总线的方法来实现
+
+   * 在main.js中创建一个事件总线
+
+     ```js
+     new Vue({
+       el:"#app",
+       render: h => h(App),
+       router,
+       store,
+       beforeCreate(){
+         Vue.prototype.$bus = this
+       }
+     })
+     ```
+
+   * 在search组件的删除关键字函数中定义总线函数，这样其他组件就能使用这个函数
+
+     ```js
+     methods:{
+         removeKeyword(){
+           this.options.keyword = ''
+           this.$router.replace({name:'search',params:this.$router.query})
+           this.$bus.$emit('removeKeyword')
+         },
+     }
+     ```
+
+   * 在header组件中绑定这个全局事件，当删除关键字的函数被处罚，header中的value也清空
+
+     ```js
+     mounted() {
+         this.$bus.$on('removeKeyword',()=>{
+             this.value = ''
+         })
+     },
+     ```
+
+6. 根据品牌进行搜索，因为品牌数据是在search子组件中，我们需要顶一个函数用来更新品牌的条件，然后传给子组件调用,并且判断每次点击的条件是否一样，如果是一样就不发请求
+
+   ```html
+   <SearchSelector :setTrademark="setTrademark" />
+   ```
+
+   ```js
+   method:{
+   	setTrademark(trademark){
+         if(this.options.trademark === trademark) return
+         this.options.trademark = trademark
+         this.getProductList()
+       }
+   }
+   ```
+
+7. 然后在子组件中获取这个setTrademark函数，并点击调用这个函数，还需要传入对应的参数
+
+   ```html
+   <div class="value logos">
+     <ul class="logo-list">
+       <li v-for="(item, index) in trademarkList" :key="item.tmId" 		     @click="setTrademark(`${item.tmId}:${item.tmName}`)">{{item.tmName}}</li>
+     </ul>
+   </div>
+   ```
+
+   ```js
+   export default {
+       props:['setTrademark'],
+   }
+   ```
+
+8. 定义一个删除删除品牌条件的函数
+
+   ```
+   removeTrademark(){
+         this.options.trademark = ''
+         this.getProductList()
+   },
+   ```
+
+9. 根据属性条件进行搜索，因为设计到子组件，所以我们需要从子组件分发一个事件并传给父组件调用
+
+   ```html
+   <!-- 父组件接收 -->
+   <SearchSelector :setTrademark="setTrademark" @addProp="addProp"/>
+   ```
+
+   ```html
+   <!-- 子组件分发 -->
+   <div v-for="(item, index) in attrsList" :key="item.attrId" class="type-wrap" >
+   	<div class="fl key">{{item.attrName}}</div>
+   	<div class="fl value">
+   		<ul class="type-list">
+   			<li v-for="(value, index) in item.attrValueList" :key="value" @click="$emit('addProp',`${item.attrId}:${value}:${item.attrName}`)">
+   				<a>{{value}}</a>
+   			</li>
+   		</ul>
+   	</div>
+   	<div class="fl ext"></div>
+   </div>
+   ```
+
+   ```html
+   <!-- 父组件显示条件,点击x按钮删除对应的数组元素（条件） -->
+   <ul class="fl sui-tag">
+     <li v-for="(prop, index) in options.props" :key="prop" class="with-x">
+       {{prop}}
+       <i  @click="props.splice(index,1)">×</i>
+     </li>
+   </ul>
+   ```
+
+   ```js
+   // 父组件定义一个添加条件的函数和删除条件的函数
+   addProp(prop){
+     if(this.options.props.indexOf(prop) >= 0) return
+     this.options.props.push(prop)
+     this.getProductList()
+   },
+   removeProp(index){
+     this.options.props.splice(index,1)
+     this.getProductList()
+   }
+   ```
+
+## 25、排序显示商品
+
+1. 首先在public的index文件中引入图标字体
+
+   ```html
+   <link rel="stylesheet" href="http://at.alicdn.com/t/font_1879958_lciznj8fphd.css">
+   ```
+
+2. 然后在search组件中找到排序的标签，并将显示背景红色的class通过options的属性动态生成
+
+   ```html
+   <ul class="sui-nav">
+     <li :class="{active : options.order.indexOf('1') === 0}">
+       <a href="javascript:;">综合</a>
+     </li>
+     <li>
+       <a href="#">销量</a>
+     </li>
+     <li>
+       <a href="#">新品</a>
+     </li>
+     <li>
+       <a href="#">评价</a>
+     </li>
+     <li :class="{active : options.order.indexOf('2') === 0}">
+       <a href="javascript:;">价格</a>
+     </li>
+   </ul>
+   ```
+
+3. 定义一个计算属性，用来判断是升序还是降序
+
+   ```js
+   computed:{
+       iconClass(){
+         return this.options.order.split(':')[1] === 'asc' ? 'icon-jiantou-copy-copy':'icon-jiantou'
+       }
+   }
+   ```
+
+4. 简化是否选择’综合‘或者’价格‘排序的类名，创建一个函数，isActive
+
+   ```js
+   method:{
+   	isActive(num){
+         return this.options.order.indexOf(num) === 0
+       }
+   }
+   ```
+
+   ```html
+   <!-- 优化后 -->
+   <ul class="sui-nav">
+     <li :class="{active : isActive('1')}">
+       <a href="javascript:;">综合
+         <i class="iconfont" v-if="isActive('1')" :class="iconClass"></i>
+       </a>
+     </li>
+     <li>
+       <a href="#">销量</a>
+     </li>
+     <li>
+       <a href="#">新品</a>
+     </li>
+     <li>
+       <a href="#">评价</a>
+     </li>
+     <li :class="{active : isActive('2')}">
+       <a href="javascript:;">价格
+         <i class="iconfont" v-if="isActive('2')" :class="iconClass"></i>
+       </a>
+     </li>
+   </ul>
+   ```
+
+5. 点击对应的排序项进行排序
+
+   * 创建一个点击函数
+
+     ```
+     method:{
+     	
+     }
+     ```
+
+     
 
 
 
