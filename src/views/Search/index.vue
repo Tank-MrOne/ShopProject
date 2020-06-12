@@ -69,9 +69,9 @@
               >
                 <div class="list-wrap">
                   <div class="p-img">
-                    <a href="javascript:;" target="_blank">
+                    <router-link :to="`/detail/${goods.id}`">
                       <img :src="goods.defaultImg" />
-                    </a>
+                    </router-link>
                   </div>
                   <div class="price">
                     <strong>

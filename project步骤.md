@@ -1862,7 +1862,46 @@
      </ul>
      ```
 
-     
+## 26、实现商品详情页的渲染效果
+
+1. 首先把老师的Detail静态组件放到views或pages文件夹下
+
+2. 在router目录下的routers.js中定义关于detail组件的路由规则
+
+   ```js
+   import Detail from '../views/Detail'
+   export default[
+   	{
+           path:'/detail/:id',
+           component:Detail
+   	}
+   ]
+   ```
+
+3. 在router目录下的index.js文件中处理一个切换页面不是在页面最顶显示的问题
+
+   ```js
+   export default new VueRouter({
+       mode:'history',
+       routes,
+       scrollBehavior(to,from,savadPosition){
+           return {x : 0 ,y : 0}
+       }
+   })
+   ```
+
+4. 找到search组件，在index.vue文件中找到商品图标，将a标签换成router-Link,并传入商品id值作为params参数
+
+   ```html
+   <!-- 在class="list-warap"的div标签下 -->
+   <div class="p-img">
+     <router-link :to="`/detail/${goods.id}`">
+       <img :src="goods.defaultImg" />
+     </router-link>
+   </div>
+   ```
+
+   
 
 
 

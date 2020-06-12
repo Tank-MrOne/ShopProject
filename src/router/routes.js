@@ -2,6 +2,7 @@ import Home from '../views/Home'
 import Search from '../views/Search'
 import Register from '../views/Register'
 import Login from '../views/Login'
+import Detail from '../views/Detail'
 
 export default[
     {
@@ -31,4 +32,8 @@ export default[
             isHide:true
         }
     },
+    {
+        path:'/detail/:id',
+        component:Detail
+    }
 ]
