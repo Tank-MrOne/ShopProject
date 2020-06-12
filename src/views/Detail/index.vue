@@ -65,7 +65,9 @@
               <div class="choosed"></div>
               <dl v-for="(attrList, index) in detail.spuSaleAttrList" :key="attrList.id">
                 <dt class="title">{{attrList.saleAttrName}}</dt>
-                <dd v-for="(item, index) in attrList.spuSaleAttrValueList" :key="item.id"  :class="item.isChecked === '1'? 'active':''">
+                <dd v-for="(item, index) in attrList.spuSaleAttrValueList" :key="item.id"  :class="item.isChecked === '1'? 'active':''"
+                  @click="changeValue(item,attrList.spuSaleAttrValueList)"
+                >
                   {{item.saleAttrValueName}}
                 </dd>
               </dl>
@@ -355,6 +357,11 @@
     methods:{
       updateIndex(index){
         this.currentIndex = index
+      },
+      changeValue(value,valueList){
+        if(value.isChecked === '1') return
+        valueList.forEach(element => element.isChecked = '0');
+        value.isChecked = '1'
       }
     }
   }

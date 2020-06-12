@@ -2184,7 +2184,23 @@
        }
        ```
 
-       
+12. 商品详情页选择规格添加点击切换被选中的规格效果，在dd列表中添加一个点击事件，将当前的值和整个数组当作参数传入
+
+    ```html
+    <dd v-for="(item, index) in attrList.spuSaleAttrValueList" :key="item.id"  :class="item.isChecked === '1'? 'active':''"  @click="changeValue(item,attrList.spuSaleAttrValueList)"  >
+    ```
+
+    ```js
+    methods:{
+      changeValue(value,valueList){
+        if(value.isChecked === '1') return
+        valueList.forEach(element => element.isChecked = '0');
+        value.isChecked = '1'
+      }
+    }
+    ```
+
+    
 
 
 
