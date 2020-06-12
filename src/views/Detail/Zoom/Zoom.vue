@@ -1,23 +1,44 @@
 <template>
   <div class="spec-preview">
     <img :src="imgUrl" />
-    <div class="event"></div>
+    <div class="event" @mousemove="move"></div>
     <div class="big">
-      <img :src="bigImg" />
+      <img :src="bigImg" ref="big"/>
     </div>
-    <div class="mask"></div>
-    
+    <div class="mask" ref="mask"></div>
   </div>
- 
 </template>
 
 <script>
+  import throttle from 'lodash/throttle' 
   export default {
     name: "Zoom",
     props:{
       imgUrl : String,
       bigImg : String 
     },
+    methods:{
+      move : throttle(function (event){
+        let left , top
+        const maskDiv = this.$refs.mask
+        const bigImg = this.$refs.big
+        const {offsetX,offsetY} = event
+        const maskW = this.$refs.mask.clientWidth
+
+        left = offsetX - maskW/2
+        top = offsetY - maskW/2
+        if(left < 0) left = 0
+        if(left>maskW) left = maskW
+        if(top < 0) top = 0
+        if(top>maskW) top = maskW
+
+        maskDiv.style.left = left+'px'
+        maskDiv.style.top = top+'px'
+        bigImg.style.left =-2 * left+'px'
+        bigImg.style.top =-2 * top+'px'
+
+      },50)
+    }
   }
 </script>
 

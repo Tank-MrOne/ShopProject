@@ -2200,6 +2200,78 @@
     }
     ```
 
+13. 实现鼠标移动到图片产生放大镜效果，找到Zoom子组建，在class="event"的标签上添加一个鼠标移动事件，然后通过ref获取图片和大图展示区的标签
+
+    ```html
+    <template>
+      <div class="spec-preview">
+        <img :src="imgUrl" />
+        <div class="event" @mousemove="move"></div>
+        <div class="big">
+          <img :src="bigImg" ref="big"/>
+        </div>
+        <div class="mask" ref="mask"></div>
+      </div>
+    </template>
+    ```
+
+    鼠标移动事件
+
+    ```js
+    methods:{
+      move(event){
+        let left , top
+        const maskDiv = this.$refs.mask
+        const bigImg = this.$refs.big
+        const {offsetX,offsetY} = event
+        const maskW = this.$refs.mask.clientWidth
+    
+        left = offsetX - maskW/2
+        top = offsetY - maskW/2
+        if(left < 0) left = 0
+        if(left>maskW) left = maskW
+        if(top < 0) top = 0
+        if(top>maskW) top = maskW
+    
+        maskDiv.style.left = left+'px'
+        maskDiv.style.top = top+'px'
+        bigImg.style.left =-2 * left+'px'
+        bigImg.style.top =-2 * top+'px'
+    
+      }
+    }
+    ```
+
+    使用节流方式来优化渲染，首先导入loadsh的throttle节流函数，将我们的移动函数进行节流，设置每50毫秒触发一次
+
+    ```js
+    import throttle from 'lodash/throttle' 
+    methods:{
+      move : throttle(function (event){
+        let left , top
+        const maskDiv = this.$refs.mask
+        const bigImg = this.$refs.big
+        const {offsetX,offsetY} = event
+        const maskW = this.$refs.mask.clientWidth
+    
+        left = offsetX - maskW/2
+        top = offsetY - maskW/2
+        if(left < 0) left = 0
+        if(left>maskW) left = maskW
+        if(top < 0) top = 0
+        if(top>maskW) top = maskW
+    
+        maskDiv.style.left = left+'px'
+        maskDiv.style.top = top+'px'
+        bigImg.style.left =-2 * left+'px'
+        bigImg.style.top =-2 * top+'px'
+    
+      },50)
+    }
+    ```
+
+    
+
     
 
 
