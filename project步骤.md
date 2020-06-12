@@ -2270,9 +2270,75 @@
     }
     ```
 
-    
+## 27、将商品添加到购物车
 
-    
+1. 首先定义api请求方式
+
+   ```js
+   export function reqCart(skuId,skuNum){
+       return ajax({
+           url:'/cart/addToCart/'+skuId+'/'+skuNum,
+           method:'POST'
+       })
+   }
+   ```
+
+2. 在store目录下的modules文件夹下的detail.js文件中添加一个异步请求函数，用来发送上面定义的api接口
+
+   ```js
+   actions:{
+   	async toAddCart({commit},{skuId,skuNum}){
+             const result = await reqCart(skuId,skuNum)
+             if(result.code === 200){
+                    console.log('success');
+             }else{
+                    console.log("faild");
+             }
+       }
+   }
+   ```
+
+3. 在detail组建中找到加入购物车的按钮，并给他添加一个点击事件，点击后调用上面定义的函数
+
+   声明一个保存商品数量的变量，默认是1
+
+   ```js
+   data(){
+   	return{
+   		skuNum:1
+   	}
+   }
+   ```
+
+   在页面中找到商品数量的标签，用v-model双向绑定该变量，并通过 + 、- 按钮来修改该变量的值
+
+   ```html
+   <div class="controls">
+       <input autocomplete="off" class="itxt" v-model="skuNum">
+       <a href="javascript:" class="plus" @click="skuNum++">+</a>
+       <a href="javascript:" class="mins" @click="skuNum > 1 ? skuNum-- : 1">-</a>
+   </div>
+   ```
+
+   为加入购物车按钮添加点击事件
+
+   ```html
+   <a href="javascript:" @click="addToCart">加入购物车</a>
+   ```
+
+   事件将商品id和数量传入，并向后台发送
+
+   ```js
+   methods:{
+   	addToCart(){
+       	this.$store.dispatch('toAddCart',{skuId:6,skuNum:1})
+     	}
+   }
+   ```
+
+   
+
+
 
 
 

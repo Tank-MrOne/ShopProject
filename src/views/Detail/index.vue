@@ -74,12 +74,12 @@
             </div>
             <div class="cartWrap">
               <div class="controls">
-                <input autocomplete="off" class="itxt">
-                <a href="javascript:" class="plus">+</a>
-                <a href="javascript:" class="mins">-</a>
+                <input autocomplete="off" class="itxt" v-model="skuNum">
+                <a href="javascript:" class="plus" @click="skuNum++">+</a>
+                <a href="javascript:" class="mins" @click="skuNum > 1 ? skuNum-- : 1">-</a>
               </div>
               <div class="add">
-                <a href="javascript:">加入购物车</a>
+                <a href="javascript:" @click="addToCart">加入购物车</a>
               </div>
             </div>
           </div>
@@ -338,7 +338,8 @@
     name: 'Detail',
     data(){
       return{
-        currentIndex : 0
+        currentIndex : 0,
+        skuNum:1
       }
     },
     computed: {
@@ -362,6 +363,9 @@
         if(value.isChecked === '1') return
         valueList.forEach(element => element.isChecked = '0');
         value.isChecked = '1'
+      },
+      addToCart(){
+        this.$store.dispatch('toAddCart',{skuId:this.$route.params.id,skuNum:1})
       }
     }
   }

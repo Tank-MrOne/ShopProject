@@ -29,3 +29,9 @@ export function reqProductList(options){
 
 export const reqDetail = (skuId) => ajax(`/item/${skuId}`)
 
+export function reqCart(skuId,skuNum){
+    return ajax({
+        url:'/cart/addToCart/'+skuId+'/'+skuNum,
+        method:'POST'
+    })
+}

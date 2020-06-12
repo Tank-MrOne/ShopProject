@@ -1,4 +1,4 @@
-import {reqDetail} from '../../api'
+import {reqDetail,reqCart} from '../../api'
 
 export default {
         state:{
@@ -15,6 +15,14 @@ export default {
                         if(result.code === 200){
                                 const detailItem = result.data
                                 commit('receive_detail',detailItem)
+                        }
+                },
+                async toAddCart({commit},{skuId,skuNum}){
+                        const result = await reqCart(skuId,skuNum)
+                        if(result.code === 200){
+                                console.log('success');
+                        }else{
+                                console.log("faild");
                         }
                 }
         },
