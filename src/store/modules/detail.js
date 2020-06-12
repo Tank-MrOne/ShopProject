@@ -17,12 +17,12 @@ export default {
                                 commit('receive_detail',detailItem)
                         }
                 },
-                async toAddCart({commit},{skuId,skuNum}){
+                async toAddCart({commit},{skuId,skuNum,callback}){
                         const result = await reqCart(skuId,skuNum)
                         if(result.code === 200){
-                                console.log('success');
+                                callback(true)
                         }else{
-                                console.log("faild");
+                                callback(false)
                         }
                 }
         },

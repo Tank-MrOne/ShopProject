@@ -365,7 +365,14 @@
         value.isChecked = '1'
       },
       addToCart(){
-        this.$store.dispatch('toAddCart',{skuId:this.$route.params.id,skuNum:1})
+        this.$store.dispatch('toAddCart',{skuId:this.$route.params.id,skuNum:this.skuNum,callback:this.callBack})
+      },
+      callBack(flag){
+        if(flag){
+          alert('success')
+        }else{
+          alert('faild')
+        }
       }
     }
   }

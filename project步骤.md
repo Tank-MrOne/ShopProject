@@ -2331,8 +2331,45 @@
    ```js
    methods:{
    	addToCart(){
-       	this.$store.dispatch('toAddCart',{skuId:6,skuNum:1})
+       	this.$store.dispatch('toAddCart',{skuId:this.$route.params.id,skuNum:this.skuNum})
      	}
+   }
+   ```
+
+   在addToCart函数中，再传入一个参数，用来做回调函数，当添加成功或者失败后执行这个回调函数，首先创建一个回调函数
+
+   ```js
+   methods:{
+   	callBack(flag){
+   		if(flag){
+   			alert('success')
+   		}else{
+   			alert('faild')
+   		}
+   	}
+   }
+   ```
+
+   修改addToCart和store目录下的modules的detail文件中的toAddCart函数
+
+   ```js
+   methods:{
+   	addToCart(){
+       	this.$store.dispatch('toAddCart',{skuId:this.$route.params.id,skuNum:this.skuNum,callback:this.callBack})
+     	}
+   }
+   ```
+
+   ```js
+   actions:{
+   	async toAddCart({commit},{skuId,skuNum,callback}){
+       	const result = await reqCart(skuId,skuNum)
+       		if(result.code === 200){
+       			callback(true)
+       		}else{
+       			callback(false)
+       	}
+       }
    }
    ```
 
