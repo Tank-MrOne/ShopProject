@@ -1,17 +1,23 @@
 <template>
   <div class="spec-preview">
-    <img src="../images/s1.png" />
+    <img :src="imgUrl" />
     <div class="event"></div>
     <div class="big">
-      <img src="../images/s1.png" />
+      <img :src="bigImg" />
     </div>
     <div class="mask"></div>
+    
   </div>
+ 
 </template>
 
 <script>
   export default {
     name: "Zoom",
+    props:{
+      imgUrl : String,
+      bigImg : String 
+    },
   }
 </script>
 

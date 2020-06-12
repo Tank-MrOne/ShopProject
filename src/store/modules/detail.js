@@ -21,6 +21,11 @@ export default {
         getters:{
                 skuInfo(state){
                         return state.detailItem.skuInfo ? state.detailItem.skuInfo : {}
+                },
+                skuImage(state){
+                        const skuInfo = state.detailItem.skuInfo
+                        
+                        return skuInfo ? skuInfo.skuImageList : []
                 }
 
         }

@@ -1901,7 +1901,292 @@
    </div>
    ```
 
+5. 定义访问后台的api接口，通过接口获取数据，在api目录下的index.js文件中暴露一个接口对象，这个接口需要传一个id参数
+
+   ```js
+   export const reqDetail = (skuId) => ajax(`/item/${skuId}`)
+   ```
+
+6. 然后定义一个管理detail后台管理数据的vuex文件，在store目录下的modules目录下，创建一个detail.js文件，在里面通过api将获取的数据进行管理
+
+   ```js
+   import {reqDetail} from '../../api'
    
+   export default {
+           state:{
+                   detailItem : {}
+           },
+           mutations :{
+                   receive_detail(state,detailItem){
+                           state.detailItem = detailItem
+                   }
+           },
+           actions:{
+                   async getDetail({commit},detailItem){
+                           const result = await reqDetail(detailItem)
+                           if(result.code === 200){
+                                   const detailItem = result.data
+                                   commit('receive_detail',detailItem)
+                           }
+                   }
+           },
+           getters:{
+                   skuInfo(state){
+                           return state.detailItem.skuInfo ? state.detailItem.skuInfo : {}
+                   }
+           }
+   }
+   
+   ```
+
+   再将这个detail文件在store目录下的index.js文件中集中管理，并暴露出去
+
+   ```js
+   import detail from '@/store/modules/detail'
+   export default new Vuex.Store({
+       mutations,
+       actions,
+       getters,
+       modules:{
+           detail
+       }
+   })
+   ```
+
+7. 在detail组建中触发上面定义的接口，将获取的数据动态显示到页面上
+
+   ```js
+   // 在页面渲染完成后，调用接口将数据存储到vuex，传入的参数是从search组件点击商品，得到商品的id而来(上面第4步)
+   mounted() {
+   	this.$store.dispatch('getDetail',this.$route.params.id)
+   },
+   ```
+
+   ```js
+   //通过计算属性获取后台数据的值
+   import {mapState} from 'vuex'
+   import {mapGetters} from 'vuex'
+   export default {
+   	computed: {
+   		...mapState({
+   			detail : state => state.detail.detailItem
+   		}),
+           //通过vuex的getter处理，获取商品详细信息的数据
+   		...mapGetters(['skuInfo'])
+   	},
+   }
+   ```
+
+   ```html
+   <!-- 导航路径区域 -->
+   <!-- 导航路径区域动态展示1级分类，2级分类，3级分类的数据，并通过v-if处理页面刷新时获取不到数据而报错 -->
+   <div class="conPoin" v-if="detail.categoryView">
+   	<span>{{detail.categoryView.category1Name}}</span>
+   	<span>{{detail.categoryView.category2Name}}</span>
+   	<span>{{detail.categoryView.category3Name}}</span>
+   </div>
+   ```
+
+   ```html
+   <!-- 右侧选择区域布局 -->
+   <div class="InfoWrap">
+   	<div class="goodsDetail">
+   		<h3 class="InfoName">{{skuInfo.skuName}}</h3>
+   		<p class="news">{{skuInfo.skuDesc}}</p>
+   		<div class="priceArea">
+   			<div class="priceArea1">
+   				<div class="title">价&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;格</div>
+   				<div class="price">
+   					<i>?</i>
+   					<em>{{skuInfo.price}}</em>
+   					<span>降价通知</span>
+   ```
+
+   ```html
+   <!-- 规格选择模块动态展示 -->
+   <div class="chooseArea">
+     <div class="choosed"></div>
+     <dl v-for="(attrList, index) in detail.spuSaleAttrList" :key="attrList.id">
+       <dt class="title">{{attrList.saleAttrName}}</dt>
+       <dd v-for="(item, index) in attrList.spuSaleAttrValueList" :key="item.id"  :class="item.isChecked === '1'? 'active':''">
+         {{item.saleAttrValueName}}
+       </dd>
+     </dl>
+   </div>
+   ```
+
+8. 动态展示商品图片区域，首先在store目录下的modules目录的detail.js文件中的getters对象内处理图片数据的值
+
+   ```js
+   getters:{
+           skuImage(state){
+                   const skuInfo = state.detailItem.skuInfo
+                   return skuInfo ? skuInfo.skuImageList : []
+           }
+   
+   }
+   ```
+
+   找到detail组建下的ImageList子组件，在组建中导入getters处理的数据，并动态展示到页面中
+
+   ```js
+   import {mapGetters} from 'vuex'
+   export default {
+       name: "ImageList",
+       computed:{
+         ...mapGetters(['skuImage'])
+       }
+   }
+   ```
+
+   ```html
+   <template>
+     <div class="swiper-container">
+       <div class="swiper-wrapper">
+         <div class="swiper-slide" v-for="(item,index)  in skuImage" :key="item.id">
+           <img :src="item.imgUrl">
+         </div>
+       </div>
+       <div class="swiper-button-next"></div>
+       <div class="swiper-button-prev"></div>
+     </div>
+   </template>
+   ```
+
+   ```css
+   /* 给img的css样式添加一个居中样式，为了渲染效果更好 */
+   img{
+   	margin : 0 auto ;
+   }
+   ```
+
+   
+
+9. 小图片列表利用swiper实现滑动效果
+
+   ```js
+   //首先通过数据监听，将swiper的函数调用
+   watch: {
+     skuImageList: {
+       handler() {
+         this.$nextTick(()=>{
+           new Swiper(this.$refs.swiper, {
+             slidesPerView:5,
+             slidesPerGroup:2,
+             navigation: {
+               nextEl: ".swiper-button-next",
+               prevEl: ".swiper-button-prev"
+             }
+           });
+         })
+       },
+       immediate:true
+     }
+   }
+   ```
+
+   ```html
+   <!-- 在最外层div中添加一个ref标识 -->
+   <div class="swiper-container" ref="swiper"> ... </div>
+   ```
+
+10. 实现点击小图片进行标识效果
+
+    ```js
+    //创建一个数据用来保存图片的默认下标
+    data(){
+      return {
+        currentIndex : 0
+      }
+    },
+    ```
+
+    ```html
+    <!-- 给每个图片添加一个事件监听，点击修改当前点击的图片类名 -->
+    <img :src="item.imgUrl" :class="{active: currentIndex === index}" @click="changeCurrent(index)"/>
+    ```
+
+    ```js
+    methods:{
+        changeCurrent(index){
+          this.currentIndex = index
+        }
+    }
+    ```
+
+11. 实现点击小图片，在大图片上显示对应图片
+
+    1. 首先找到Zoom子组建，里面需要接收中图和大图两个数据，并动态展示到页面上
+
+       ```vue
+       <template>
+         <div class="spec-preview">
+           <img :src="imgUrl" />
+           <div class="event"></div>
+           <div class="big">
+             <img :src="bigImg" />
+           </div>
+           <div class="mask"></div>
+         </div>
+       </template>
+       
+       <script>
+         export default {
+           name: "Zoom",
+           props:{
+             imgUrl : String,
+             bigImg : String 
+           }
+         }
+       </script>
+       ```
+
+    2. 在父组件需要声明一个变量，用来标识图片的下标，默认是0，第一张，并通过下标将对应的图片地址传给子组建Zoom
+
+       ```js
+       data(){
+       	return{
+       		currentIndex : 0
+       	}
+       },
+       computed: {
+            ...mapGetters(['skuInfo','skuImage'])
+       },
+       ```
+
+       ```vue
+       <Zoom v-if="skuImage.length>0" :imgUrl="skuImage[currentIndex].imgUrl" :bigImg="skuImage[currentIndex].imgUrl"/>
+       ```
+
+    3. 在imageList子组件中定义的修改下标函数中，通知父组件下标发生变化了,并传入一个下标
+
+       ```js
+       methods:{
+         changeCurrent(index){
+           if(index === this.currentIndex) return
+           this.currentIndex = index
+           this.$emit('changeIndex',index)
+         }
+       }
+       ```
+
+    4. 然后在父组件中绑定这个事件，一旦触发则调用父组件中的函数updateIndex()
+
+       ```html
+       <ImageList @changeIndex="updateIndex" />
+       ```
+
+       ```js
+       methods:{
+         updateIndex(index){
+           this.currentIndex = index
+         }
+       }
+       ```
+
+       
+
+
 
 
 

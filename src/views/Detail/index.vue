@@ -16,9 +16,9 @@
         <!-- 左侧放大镜区域 -->
         <div class="previewWrap">
           <!--放大镜效果-->
-          <Zoom />
+          <Zoom v-if="skuImage.length>0" :imgUrl="skuImage[currentIndex].imgUrl" :bigImg="skuImage[currentIndex].imgUrl"/>
           <!-- 小图列表 -->
-          <ImageList />
+          <ImageList @changeIndex="updateIndex" />
         </div>
         <!-- 右侧选择区域布局 -->
         <div class="InfoWrap">
@@ -334,11 +334,16 @@
   import {mapGetters} from 'vuex'
   export default {
     name: 'Detail',
+    data(){
+      return{
+        currentIndex : 0
+      }
+    },
     computed: {
       ...mapState({
         detail : state => state.detail.detailItem
       }),
-      ...mapGetters(['skuInfo'])
+      ...mapGetters(['skuInfo','skuImage'])
     },
     components: {
       ImageList,
@@ -347,6 +352,11 @@
     mounted() {
       this.$store.dispatch('getDetail',this.$route.params.id)
     },
+    methods:{
+      updateIndex(index){
+        this.currentIndex = index
+      }
+    }
   }
 </script>
 
