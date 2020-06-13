@@ -35,3 +35,7 @@ export function reqCart(skuId,skuNum){
         method:'POST'
     })
 }
+
+export const reqShopCart = () => ajax.get('/cart/cartList')
+export const reqCheckCartItem = (skuId, isChecked) => ajax.get(`/cart/checkCart/${skuId}/${isChecked}`)
+export const reqDeleteCartItem = (skuId) => ajax.delete(`/cart/deleteCart/${skuId}`)

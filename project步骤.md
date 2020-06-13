@@ -2315,19 +2315,33 @@
    ```html
    <div class="controls">
        <input autocomplete="off" class="itxt" v-model="skuNum">
-       <a href="javascript:" class="plus" @click="skuNum++">+</a>
+       <a href="javascript:" class="plus" @click="skuNum = skuNum * 1 + 1">+</a>
        <a href="javascript:" class="mins" @click="skuNum > 1 ? skuNum-- : 1">-</a>
    </div>
    ```
 
+   通过监听监视skuNum是否是数字
+
+   ```js
+   watch:{
+     skuNum(value){
+    if(value>0){
+         this.skuNum = value
+    }else{
+         this.skuNum = 1
+       }
+     }
+   },
+   ```
+   
    为加入购物车按钮添加点击事件
 
    ```html
-   <a href="javascript:" @click="addToCart">加入购物车</a>
+<a href="javascript:" @click="addToCart">加入购物车</a>
    ```
-
+   
    事件将商品id和数量传入，并向后台发送
-
+   
    ```js
    methods:{
    	addToCart(){
@@ -2345,21 +2359,21 @@
    			alert('success')
    		}else{
    			alert('faild')
-   		}
+		}
    	}
    }
    ```
-
+   
    修改addToCart和store目录下的modules的detail文件中的toAddCart函数
-
+   
    ```js
    methods:{
    	addToCart(){
        	this.$store.dispatch('toAddCart',{skuId:this.$route.params.id,skuNum:this.skuNum,callback:this.callBack})
      	}
    }
-   ```
-
+```
+   
    ```js
    actions:{
    	async toAddCart({commit},{skuId,skuNum,callback}){
@@ -2373,11 +2387,97 @@
    }
    ```
 
+4. 将老师的AddCartSuccess和ShopCart两个静态组建放到views或pages目录下
+
+5. 定义两个组件的路由规则，在router目录下的routes.js文件中定义
+
+   ```js
+   import AddCartSuccess from '../views/AddCartSuccess'
+   import ShopCart from '../views/ShopCart'
    
+   export default[
+   	{
+           path:'/addcartsuccess',
+           component:AddCartSuccess
+       },
+       {
+           path:'/shopcart',
+           component:ShopCart
+       }
+   ]
+   ```
 
+6. 然后在detail组件下的添加购物车点击事件中，如果添加成功则跳转到AddCartSuccess组件
 
+   ```js
+   methods:{
+   	callBack(flag){
+   		if(flag){
+   			this.$router.push('/addcartsuccess')
+   		}else{
+   			alert('faild')
+   		}
+   	}
+   }
+   ```
 
+7. 在AddCartSuccess组件中找到‘去购物车结算’按钮，并用router-link标签跳转到ShopCart组件
 
+   ```html
+   <router-link to="/shopcart">去购物车结算 > </router-link>
+   ```
+
+8. 在api目录下的index.js中定义以下几个接口
+
+   1. 获取购物车信息接口
+
+      ```JS
+      export const reqShopCart = () => ajax.get('/cart/cartList')
+      ```
+
+   2. 切换商品规格信息接口
+
+      ```js
+      export const reqCheckCartItem = (skuId, isChecked) => ajax.get(`/cart/checkCart/${skuId}/${isChecked}`)
+      ```
+
+   3. 删除购物车商品接口
+
+      ```js
+      export const reqDeleteCartItem = (skuId) => ajax.delete(`/cart/deleteCart/${skuId}`)
+      ```
+
+9. 在store目录下的modules目录下新建一个管理购物车数据的vuex文件，shopCart.js
+
+   ```js
+   import {reqShopCart} from '../../api'
+   
+   export default {
+       state:{
+           cartList:[]
+       },
+       mutations :{
+           receive_shopcart_list(state,cartList){
+               state.cartList = cartList
+           }
+       },
+       actions:{
+           async getShopCartList({commit}){
+               const result = await reqShopCart()
+               if(result.code === 200){
+                   const cartList = result.data
+                   commit('receive_shopcart_list',cartList)
+               }
+           }, 
+       },
+       getters:{
+            
+       }
+   }
+   
+   ```
+
+   
 
 
 

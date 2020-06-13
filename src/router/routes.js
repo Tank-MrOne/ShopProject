@@ -3,6 +3,8 @@ import Search from '../views/Search'
 import Register from '../views/Register'
 import Login from '../views/Login'
 import Detail from '../views/Detail'
+import AddCartSuccess from '../views/AddCartSuccess'
+import ShopCart from '../views/ShopCart'
 
 export default[
     {
@@ -35,5 +37,13 @@ export default[
     {
         path:'/detail/:id',
         component:Detail
+    },
+    {
+        path:'/addcartsuccess',
+        component:AddCartSuccess
+    },
+    {
+        path:'/shopcart',
+        component:ShopCart
     }
 ]
