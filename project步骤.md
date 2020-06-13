@@ -2477,7 +2477,60 @@
    
    ```
 
-   
+10. 在Detail组件中的添加购物车按钮中，将skuInfo数据存储到sessionStorage中，并传入AddCartSuccess组件中，并将商品数量也通过query参数传入
 
+    ```js
+    methods:{
+    	callBack(flag){
+    		if(flag){
+    			window.sessionStorage.setItem('skuInfo',JSON.stringify(this.skuInfo))
+    			this.$router.push({path:'/addcartsuccess',query:{skuNum:this.skuNum}})
+    		}else{
+    			alert('faild')
+    		}
+    	}
+    }
+    ```
 
+11. 在AddCartSucceess中定义一个变量用来接收sessionStorage中的shtInfo数据，并将这个数据动态展示到页面当中
+
+    ```js
+    export default {
+      name: 'AddCartSuccess',
+      data(){
+        return{
+          skuInfo:{}
+        }
+      },
+      beforeMount(){
+        this.skuInfo = JSON.parse(window.sessionStorage.getItem('skuInfo'))
+      }
+    }
+    ```
+
+    数据动态展示到页面
+
+    ```html
+    <div class="left-good">
+      <div class="left-pic">
+        <img :src="skuInfo.skuDefaultImg">
+      </div>
+      <div class="right-info">
+        <p class="title">{{skuInfo.skuName}}</p>
+        <p class="attr">颜色：WFZ5099IH/5L钛金釜内胆 数量：{{$route.query.skuNum}}</p>
+      </div>
+    </div>
+    <div class="right-gocart">
+      <router-link :to="`/detail/${skuInfo.id}`" class="sui-btn btn-xlarge">查看商品详情</router-link>
+      <router-link to="/shopcart">去购物车结算 > </router-link>
+    </div>
+    ```
+
+12. 将老师静态代码中的fonts文件夹放到项目的public目录下，再将iconfont.css文件放到public目录下的css文件夹下，在reset.css文件中导入iconfont.css
+
+    ```css
+    @import './iconfont.css' 
+    ```
+
+    
 

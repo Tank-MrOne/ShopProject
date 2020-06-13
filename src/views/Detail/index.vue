@@ -378,7 +378,8 @@
       },
       callBack(flag){
         if(flag){
-          this.$router.push('/addcartsuccess')
+          window.sessionStorage.setItem('skuInfo',JSON.stringify(this.skuInfo))
+          this.$router.push({path:'/addcartsuccess',query:{skuNum:this.skuNum}})
         }else{
           alert('faild')
         }
