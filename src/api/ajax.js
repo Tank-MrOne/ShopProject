@@ -1,5 +1,6 @@
 import axios from "axios"
 import NProgress from 'nprogress'
+import store from '../store'
 
 //创建axios新实例，修改两个属性
 const instance = axios.create({
@@ -10,6 +11,11 @@ const instance = axios.create({
 //注册请求拦截器
 instance.interceptors.request.use(config => {
     NProgress.start()
+    config.headers['userTempId'] = store.state.users.userTempId
+    const token = store.state.users.userInfo.token
+    if(token){
+        config.headers['token']= token
+    }
     return config
 })
 

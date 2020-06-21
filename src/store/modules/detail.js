@@ -24,6 +24,12 @@ export default {
                         }else{
                                 callback(false)
                         }
+                },
+                async toAddCart2({commit},{skuId,skuNum}){
+                        const result = await reqCart(skuId,skuNum)
+                        if(result.code !== 200){
+                                throw new Error('商品修改失败')
+                        }
                 }
         },
         getters:{

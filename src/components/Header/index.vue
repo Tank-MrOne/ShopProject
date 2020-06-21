@@ -5,15 +5,19 @@
                 <div class="container">
                     <div class="loginList">
                         <p>尚品汇欢迎您！</p>
-                        <p>
+                        <p v-if="userInfo.token">
+                            <span>{{userInfo.name}}</span> &nbsp;&nbsp;&nbsp;
+                            <a href="javascript:;" @click="logout">退出</a>
+                        </p>
+                        <p v-else>
                             <span>请</span>
                             <router-link to="/login">登录</router-link>
                             <router-link to="/register" class="register">免费注册</router-link>
                         </p>
                     </div>
                     <div class="typeList">
-                        <a href="###">我的订单</a>
-                        <a href="###">我的购物车</a>
+                        <router-link to="/center">我的订单</router-link>
+                        <router-link to="/shopcart"> 我的购物车</router-link>
                         <a href="###">我的尚品汇</a>
                         <a href="###">尚品汇会员</a>
                         <a href="###">企业采购</a>
@@ -50,6 +54,11 @@ export default {
     data() {
         return {
             value: ""
+        }
+    },
+    computed: {
+        userInfo(){
+            return this.$store.state.users.userInfo
         }
     },
     mounted() {
@@ -91,6 +100,15 @@ export default {
 
             // 4、解决重复提交相同代码出错
             // this.$router.push(location)
+        },
+        logout(){
+            if(confirm('确定退出吗？')){
+                this.$store.dispatch('quit').then(()=>{
+                    this.$router.push('/login')
+                }).catch(error => {
+                    alert(error.message)
+                })
+            }
         }
     }
 }

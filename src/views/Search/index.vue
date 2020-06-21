@@ -70,7 +70,7 @@
                 <div class="list-wrap">
                   <div class="p-img">
                     <router-link :to="`/detail/${goods.id}`">
-                      <img :src="goods.defaultImg" />
+                      <img v-lazy="goods.defaultImg" />
                     </router-link>
                   </div>
                   <div class="price">
@@ -90,8 +90,8 @@
                   </div>
                   <div class="operate">
                     <a
-                      href="success-cart.html"
-                      target="_blank"
+                      @click="addToCart(goods)"
+                      href="javascript:;"
                       class="sui-btn btn-bordered btn-danger"
                     >加入购物车</a>
                     <a href="javascript:void(0);" class="sui-btn btn-bordered">收藏</a>
@@ -217,6 +217,23 @@ export default {
       }
       this.options.order = orderFlag + ':' + orderType
       this.getProductList()
+    },
+    async addToCart(goods){
+      try {
+        await this.$store.dispatch('toAddCart2',{skuId:goods.id,skuNum:1})
+        const skuInfo = {
+          skuDefaultImg : goods.defaultImg,
+          skuName : goods.title,
+          id:goods.id
+        }
+        window.sessionStorage.setItem('skuInfo',JSON.stringify(skuInfo))
+        this.$router.push({
+          path:'/addcartsuccess',
+          query:{skuNum:1}
+        })
+      } catch (error) {
+        alert(error.message)
+      }
     }
   }
 };
